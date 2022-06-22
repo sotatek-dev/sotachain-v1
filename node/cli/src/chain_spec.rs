@@ -397,6 +397,28 @@ pub fn testnet_genesis(
 						storage: Default::default(),
 					},
 				);
+				map.insert(
+					H160::from_str("8097c3c354652cb1eeed3e5b65fba2576470678a")
+						.expect("internal H160 is valid; qed"),
+					fp_evm::GenesisAccount {
+						balance: U256::from_str("0xffffffffffffffffffffffffffffffff")
+							.expect("internal U256 is valid; qed"),
+						code: Default::default(),
+						nonce: Default::default(),
+						storage: Default::default(),
+					},
+				);
+				map.insert(
+					H160::from_str("9ab9804ff30eb824b5410fc14231c1ca47a879e8")
+						.expect("internal H160 is valid; qed"),
+					fp_evm::GenesisAccount {
+						balance: U256::from_str("0xffffffffffffffffffffffffffffffff")
+							.expect("internal U256 is valid; qed"),
+						code: Default::default(),
+						nonce: Default::default(),
+						storage: Default::default(),
+					},
+				);
 				map
 			},
 		},

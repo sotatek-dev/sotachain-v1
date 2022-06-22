@@ -9,6 +9,9 @@ members = [
     "runtime",
     "primitives"
 ]
+exclude = [
+    'examples/flipper'
+]
 
 [profile.release]
 panic = "unwind"
