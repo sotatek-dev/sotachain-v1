@@ -114,6 +114,9 @@ pallet-evm = { default-features = false, git = "https://github.com/sotatek-dev/f
 pallet-evm-precompile-modexp = { default-features = false, git = "https://github.com/sotatek-dev/frontier.git", branch = "polkadot-v0.9.23" }
 pallet-evm-precompile-sha3fips = { default-features = false, git = "https://github.com/sotatek-dev/frontier.git", branch = "polkadot-v0.9.23" }
 pallet-evm-precompile-simple = { default-features = false, git = "https://github.com/sotatek-dev/frontier.git", branch = "polkadot-v0.9.23" }
+pallet-evm-precompile-bn128 = { default-features = false, git = "https://github.com/sotatek-dev/frontier.git", branch = "polkadot-v0.9.23" }
+pallet-evm-precompile-blake2 = { default-features = false, git = "https://github.com/sotatek-dev/frontier.git", branch = "polkadot-v0.9.23" }
+pallet-evm-precompile-dispatch = { default-features = false, git = "https://github.com/sotatek-dev/frontier.git", branch = "polkadot-v0.9.23" }
 pallet-hotfix-sufficients = { default-features = false, git = "https://github.com/sotatek-dev/frontier.git", branch = "polkadot-v0.9.23" }
 
 [build-dependencies]
