@@ -40,6 +40,8 @@ sp-transaction-pool = { version = "4.0.0-dev", default-features = false, git = "
 sp-version = { version = "5.0.0", default-features = false, git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.23" }
 sp-io = { version = "6.0.0", default-features = false, git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.23" }
 sp-sandbox = { version = "0.10.0-dev", default-features = false, git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.23" }
+fp-rpc = { default-features = false, git = "https://github.com/sotatek-dev/frontier.git", branch = "polkadot-v0.9.23" }
+fp-self-contained = { default-features = false, git = "https://github.com/sotatek-dev/frontier.git", branch = "polkadot-v0.9.23" }
 
 # frame dependencies
 frame-executive = { version = "4.0.0-dev", default-features = false, git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.23" }
@@ -105,6 +107,14 @@ pallet-transaction-storage = { version = "4.0.0-dev", default-features = false, 
 pallet-uniques = { version = "4.0.0-dev", default-features = false, git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.23" }
 pallet-vesting = { version = "4.0.0-dev", default-features = false, git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.23" }
 pallet-whitelist = { version = "4.0.0-dev", default-features = false, git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.23" }
+pallet-base-fee = { default-features = false, git = "https://github.com/sotatek-dev/frontier.git", branch = "polkadot-v0.9.23" }
+pallet-dynamic-fee = { default-features = false, git = "https://github.com/sotatek-dev/frontier.git", branch = "polkadot-v0.9.23" }
+pallet-ethereum = { default-features = false, git = "https://github.com/sotatek-dev/frontier.git", branch = "polkadot-v0.9.23" }
+pallet-evm = { default-features = false, git = "https://github.com/sotatek-dev/frontier.git", branch = "polkadot-v0.9.23" }
+pallet-evm-precompile-modexp = { default-features = false, git = "https://github.com/sotatek-dev/frontier.git", branch = "polkadot-v0.9.23" }
+pallet-evm-precompile-sha3fips = { default-features = false, git = "https://github.com/sotatek-dev/frontier.git", branch = "polkadot-v0.9.23" }
+pallet-evm-precompile-simple = { default-features = false, git = "https://github.com/sotatek-dev/frontier.git", branch = "polkadot-v0.9.23" }
+pallet-hotfix-sufficients = { default-features = false, git = "https://github.com/sotatek-dev/frontier.git", branch = "polkadot-v0.9.23" }
 
 [build-dependencies]
 substrate-wasm-builder = { version = "5.0.0-dev", git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.23" }
@@ -185,6 +195,18 @@ std = [
 	"frame-try-runtime/std",
 	"sp-io/std",
 	"pallet-child-bounties/std",
+	# Frontier
+	"fp-rpc/std",
+	"fp-self-contained/std",
+	# Frontier FRAME
+	"pallet-base-fee/std",
+	"pallet-dynamic-fee/std",
+	"pallet-ethereum/std",
+	"pallet-evm/std",
+	"pallet-evm-precompile-modexp/std",
+	"pallet-evm-precompile-sha3fips/std",
+	"pallet-evm-precompile-simple/std",
+	"pallet-hotfix-sufficients/std",
 ]
 runtime-benchmarks = [
 	"frame-benchmarking/runtime-benchmarks",
@@ -235,6 +257,9 @@ runtime-benchmarks = [
 	"pallet-whitelist/runtime-benchmarks",
 	"frame-system-benchmarking",
 	"hex-literal",
+	"pallet-ethereum/runtime-benchmarks",
+	"pallet-evm/runtime-benchmarks",
+	"pallet-hotfix-sufficients/runtime-benchmarks",
 ]
 try-runtime = [
 	"frame-executive/try-runtime",

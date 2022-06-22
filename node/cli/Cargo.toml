@@ -45,8 +45,8 @@ rand = "0.8"
 
 # primitives
 sp-authority-discovery = { version = "4.0.0-dev", git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.23" }
-sp-consensus-babe = { version = "0.10.0-dev",  git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.23" }
-grandpa-primitives = { version = "4.0.0-dev", package = "sp-finality-grandpa",  git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.23" }
+sp-consensus-babe = { version = "0.10.0-dev", git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.23" }
+sp-finality-grandpa = { version = "4.0.0-dev", git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.23" }
 sp-api = { version = "4.0.0-dev",  git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.23" }
 sp-core = { version = "6.0.0",  git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.23" }
 sp-runtime = { version = "6.0.0", git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.23" }
@@ -58,6 +58,12 @@ sp-keystore = { version = "0.12.0", git = "https://github.com/paritytech/substra
 sp-consensus = { version = "0.10.0-dev",  git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.23" }
 sp-transaction-pool = { version = "4.0.0-dev",  git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.23" }
 sp-transaction-storage-proof = { version = "4.0.0-dev",  git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.23" }
+fp-evm = { default-features = false, git = "https://github.com/sotatek-dev/frontier.git", branch = "polkadot-v0.9.23" }
+fc-consensus = { default-features = false, git = "https://github.com/sotatek-dev/frontier.git", branch = "polkadot-v0.9.23" }
+fc-db = { default-features = false, git = "https://github.com/sotatek-dev/frontier.git", branch = "polkadot-v0.9.23" }
+fc-rpc = { default-features = false, git = "https://github.com/sotatek-dev/frontier.git", branch = "polkadot-v0.9.23" }
+fc-rpc-core = { default-features = false, git = "https://github.com/sotatek-dev/frontier.git", branch = "polkadot-v0.9.23" }
+fc-mapping-sync = { default-features = false, git = "https://github.com/sotatek-dev/frontier.git", branch = "polkadot-v0.9.23" }
 
 # client dependencies
 sc-client-api = { version = "4.0.0-dev",  git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.23" }
@@ -69,7 +75,7 @@ sc-network = { version = "0.10.0-dev",  git = "https://github.com/paritytech/sub
 sc-consensus-slots = { version = "0.10.0-dev",  git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.23" }
 sc-consensus-babe = { version = "0.10.0-dev", git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.23" }
 sc-consensus-uncles = { version = "0.10.0-dev", git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.23" }
-grandpa = { version = "0.10.0-dev", package = "sc-finality-grandpa",  git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.23" }
+sc-finality-grandpa = { version = "0.10.0-dev", git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.23" }
 sc-rpc = { version = "4.0.0-dev",  git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.23" }
 sc-basic-authorship = { version = "0.10.0-dev",  git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.23" }
 sc-service = { version = "0.10.0-dev", default-features = false,  git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.23" }

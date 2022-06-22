@@ -20,7 +20,9 @@
 
 use codec::Encode;
 use node_primitives::{AccountId, Balance, Index};
-use node_runtime::{CheckedExtrinsic, SessionKeys, SignedExtra, UncheckedExtrinsic};
+use node_runtime::{
+	CheckedExtrinsic, CheckedSignature, SessionKeys, SignedExtra, UncheckedExtrinsic,
+};
 use sp_keyring::{AccountKeyring, Ed25519Keyring, Sr25519Keyring};
 use sp_runtime::generic::Era;
 
@@ -89,7 +91,7 @@ pub fn sign(
 	genesis_hash: [u8; 32],
 ) -> UncheckedExtrinsic {
 	match xt.signed {
-		Some((signed, extra)) => {
+		CheckedSignature::Signed(signed, extra) => {
 			let payload =
 				(xt.function, extra.clone(), spec_version, tx_version, genesis_hash, genesis_hash);
 			let key = AccountKeyring::from_account_id(&signed).unwrap();
@@ -102,11 +104,14 @@ pub fn sign(
 					}
 				})
 				.into();
-			UncheckedExtrinsic {
-				signature: Some((sp_runtime::MultiAddress::Id(signed), signature, extra)),
-				function: payload.0,
-			}
+			UncheckedExtrinsic::new_signed(
+				payload.0,
+				sp_runtime::MultiAddress::Id(signed),
+				signature,
+				extra,
+			)
 		},
-		None => UncheckedExtrinsic { signature: None, function: xt.function },
+		CheckedSignature::Unsigned => UncheckedExtrinsic::new_unsigned(xt.function),
+		CheckedSignature::SelfContained(_) => UncheckedExtrinsic::new_unsigned(xt.function),
 	}
 }

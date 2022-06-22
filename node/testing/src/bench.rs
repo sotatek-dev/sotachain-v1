@@ -36,8 +36,8 @@ use codec::{Decode, Encode};
 use futures::executor;
 use node_primitives::Block;
 use node_runtime::{
-	constants::currency::DOLLARS, AccountId, BalancesCall, Call, CheckedExtrinsic, MinimumPeriod,
-	Signature, SystemCall, UncheckedExtrinsic,
+	constants::currency::DOLLARS, AccountId, BalancesCall, Call, CheckedExtrinsic,
+	CheckedSignature, MinimumPeriod, Signature, SystemCall, UncheckedExtrinsic,
 };
 use sc_block_builder::BlockBuilderProvider;
 use sc_client_api::{
@@ -95,7 +95,7 @@ pub fn drop_system_cache() {
 			target: "bench-logistics",
 			"Clearing system cache on windows is not supported. Benchmark might totally be wrong.",
 		);
-		return
+		return;
 	}
 
 	std::process::Command::new("sync")
@@ -291,7 +291,7 @@ impl<'a> Iterator for BlockContentIterator<'a> {
 
 	fn next(&mut self) -> Option<Self::Item> {
 		if self.content.size.map(|size| size <= self.iteration).unwrap_or(false) {
-			return None
+			return None;
 		}
 
 		let sender = self.keyring.at(self.iteration);
@@ -302,16 +302,17 @@ impl<'a> Iterator for BlockContentIterator<'a> {
 
 		let signed = self.keyring.sign(
 			CheckedExtrinsic {
-				signed: Some((
+				signed: CheckedSignature::Signed(
 					sender,
 					signed_extra(0, node_runtime::ExistentialDeposit::get() + 1),
-				)),
+				),
 				function: match self.content.block_type {
-					BlockType::RandomTransfersKeepAlive =>
+					BlockType::RandomTransfersKeepAlive => {
 						Call::Balances(BalancesCall::transfer_keep_alive {
 							dest: sp_runtime::MultiAddress::Id(receiver),
 							value: node_runtime::ExistentialDeposit::get() + 1,
-						}),
+						})
+					},
 					BlockType::RandomTransfersReaping => {
 						Call::Balances(BalancesCall::transfer {
 							dest: sp_runtime::MultiAddress::Id(receiver),
@@ -565,7 +566,7 @@ impl BenchKeyring {
 		genesis_hash: [u8; 32],
 	) -> UncheckedExtrinsic {
 		match xt.signed {
-			Some((signed, extra)) => {
+			CheckedSignature::Signed(signed, extra) => {
 				let payload = (
 					xt.function,
 					extra.clone(),
@@ -582,12 +583,15 @@ impl BenchKeyring {
 						key.sign(b)
 					}
 				});
-				UncheckedExtrinsic {
-					signature: Some((sp_runtime::MultiAddress::Id(signed), signature, extra)),
-					function: payload.0,
-				}
+				UncheckedExtrinsic::new_signed(
+					payload.0,
+					sp_runtime::MultiAddress::Id(signed),
+					signature,
+					extra,
+				)
 			},
-			None => UncheckedExtrinsic { signature: None, function: xt.function },
+			CheckedSignature::Unsigned => UncheckedExtrinsic::new_unsigned(xt.function),
+			CheckedSignature::SelfContained(_) => UncheckedExtrinsic::new_unsigned(xt.function),
 		}
 	}
 
