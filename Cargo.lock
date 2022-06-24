@@ -5352,7 +5352,6 @@ dependencies = [
 [[package]]
 name = "pallet-ethereum"
 version = "4.0.0-dev"
-source = "git+https://github.com/sotatek-dev/frontier.git?branch=polkadot-v0.9.23#ef16d913c8451ea341ca2d9a17f4ffd2ec297a40"
 dependencies = [
  "ethereum",
  "ethereum-types",
@@ -5364,12 +5363,16 @@ dependencies = [
  "fp-storage",
  "frame-support",
  "frame-system",
+ "hex",
+ "libsecp256k1",
+ "pallet-balances",
  "pallet-evm",
  "pallet-timestamp",
  "parity-scale-codec",
  "rlp",
  "scale-info",
  "serde",
+ "sp-core",
  "sp-io",
  "sp-runtime",
  "sp-std",
@@ -5378,7 +5381,6 @@ dependencies = [
 [[package]]
 name = "pallet-evm"
 version = "6.0.0-dev"
-source = "git+https://github.com/sotatek-dev/frontier.git?branch=polkadot-v0.9.23#ef16d913c8451ea341ca2d9a17f4ffd2ec297a40"
 dependencies = [
  "evm 0.35.0 (git+https://github.com/rust-blockchain/evm?rev=01bcbd2205a212c34451d3b4fabc962793b057d3)",
  "fp-evm",
@@ -5387,6 +5389,7 @@ dependencies = [
  "frame-system",
  "hex",
  "log",
+ "pallet-balances",
  "pallet-timestamp",
  "parity-scale-codec",
  "primitive-types",
@@ -5420,7 +5423,6 @@ dependencies = [
 [[package]]
 name = "pallet-evm-precompile-dispatch"
 version = "2.0.0-dev"
-source = "git+https://github.com/sotatek-dev/frontier.git?branch=polkadot-v0.9.23#ef16d913c8451ea341ca2d9a17f4ffd2ec297a40"
 dependencies = [
  "fp-evm",
  "frame-support",
@@ -5496,7 +5498,6 @@ dependencies = [
 [[package]]
 name = "pallet-hotfix-sufficients"
 version = "1.0.0"
-source = "git+https://github.com/sotatek-dev/frontier.git?branch=polkadot-v0.9.23#ef16d913c8451ea341ca2d9a17f4ffd2ec297a40"
 dependencies = [
  "frame-benchmarking",
  "frame-support",
@@ -5505,6 +5506,7 @@ dependencies = [
  "parity-scale-codec",
  "scale-info",
  "sp-core",
+ "sp-io",
  "sp-runtime",
  "sp-std",
 ]

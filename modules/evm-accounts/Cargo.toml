@@ -23,7 +23,7 @@ node-primitives = { path = "../../primitives", default-features = false }
 module-support = { path = "../support", default-features = false }
 module-evm-utility-macro = { path = "../evm-utility/macro" }
 module-traits = { path = "../traits", default-features = false }
-pallet-evm = { default-features = false, git = "https://github.com/sotatek-dev/frontier.git", branch = "polkadot-v0.9.23" }
+pallet-evm = { default-features = false, path = "../../pallets/evm" }
 
 # [dev-dependencies]
 # pallet-balances = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.23" }

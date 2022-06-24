@@ -1,15 +1,12 @@
 [workspace]
 members = [
-    "node/bench",
-    "node/cli",
-    "node/executor",
-    "node/inspect",
-    "node/rpc",
-    "node/testing",
+    "node/*",
     "runtime",
     "primitives",
     "modules/*",
 	"modules/evm-utility/macro",
+	"pallets/*",
+	"pallets/evm/precompile/*",
 ]
 exclude = [
     'examples/flipper'

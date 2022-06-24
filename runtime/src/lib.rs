@@ -54,7 +54,7 @@ use pallet_election_provider_multi_phase::SolutionAccuracyOf;
 use pallet_ethereum::{Call::transact, Transaction as EthereumTransaction};
 use pallet_evm::FeeCalculator;
 use pallet_evm::{
-	Account as EVMAccount, EnsureAddressTruncated, GasWeightMapping, HashedAddressMapping, Runner,
+	Account as EVMAccount, EnsureAddressTruncated, GasWeightMapping, Runner,
 };
 use pallet_grandpa::{
 	fg_primitives, AuthorityId as GrandpaId, AuthorityList as GrandpaAuthorityList,

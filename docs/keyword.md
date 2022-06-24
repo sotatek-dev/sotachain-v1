@@ -10,3 +10,8 @@
   * transfer all native currency from s1 to s2
   * link e1 to s2
   * TODO: transfer other assets, not only native currency
+
+## Fork pallets
+
+* fork from official substrate repo: `pallets`
+* fork from other: `modules`
