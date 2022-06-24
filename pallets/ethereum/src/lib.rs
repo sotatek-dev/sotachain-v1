@@ -556,6 +556,8 @@ impl<T: Config> Pallet<T> {
 			_ => return Err(InvalidTransaction::Payment.into()),
 		};
 
+		// TODO: we can config priority here
+
 		// The tag provides and requires must be filled correctly according to the nonce.
 		let mut builder = ValidTransactionBuilder::default()
 			.and_provides((origin, transaction_nonce))
