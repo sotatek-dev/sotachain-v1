@@ -40,6 +40,7 @@ use sp_runtime::{
 	Perbill,
 };
 use std::{collections::BTreeMap, str::FromStr};
+use serde_json as json;
 
 pub use node_primitives::{AccountId, Balance, Signature};
 pub use node_runtime::GenesisConfig;
@@ -69,6 +70,14 @@ pub type ChainSpec = sc_service::GenericChainSpec<GenesisConfig, Extensions>;
 pub fn flaming_fir_config() -> Result<ChainSpec, String> {
 	ChainSpec::from_json_bytes(&include_bytes!("../res/flaming-fir.json")[..])
 }
+
+const DEFAULT_PROPERTIES_TESTNET: &str = r#"
+{
+"tokenSymbol": "SOTA",
+"tokenDecimals": 18,
+"ss58Format": 42
+}
+"#;
 
 fn session_keys(
 	grandpa: GrandpaId,
@@ -198,7 +207,7 @@ pub fn staging_testnet_config() -> ChainSpec {
 		),
 		None,
 		None,
-		None,
+		Some(json::from_str(DEFAULT_PROPERTIES_TESTNET).unwrap()),
 		Default::default(),
 	)
 }
@@ -362,7 +371,7 @@ pub fn testnet_genesis(
 		},
 		vesting: Default::default(),
 		assets: Default::default(),
-		gilt: Default::default(),
+		// gilt: Default::default(),
 		transaction_storage: Default::default(),
 		transaction_payment: Default::default(),
 		nomination_pools: Default::default(),
@@ -448,7 +457,7 @@ pub fn development_config() -> ChainSpec {
 		None,
 		None,
 		None,
-		None,
+		Some(json::from_str(DEFAULT_PROPERTIES_TESTNET).unwrap()),
 		Default::default(),
 	)
 }
@@ -473,7 +482,7 @@ pub fn local_testnet_config() -> ChainSpec {
 		None,
 		None,
 		None,
-		None,
+		Some(json::from_str(DEFAULT_PROPERTIES_TESTNET).unwrap()),
 		Default::default(),
 	)
 }
