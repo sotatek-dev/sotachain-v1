@@ -1622,7 +1622,6 @@ construct_runtime!(
 		TechnicalMembership: pallet_membership::<Instance1>,
 		Grandpa: pallet_grandpa,
 		Treasury: pallet_treasury,
-		Contracts: pallet_contracts,
 		Sudo: pallet_sudo,
 		ImOnline: pallet_im_online,
 		AuthorityDiscovery: pallet_authority_discovery,
@@ -1653,11 +1652,16 @@ construct_runtime!(
 		ConvictionVoting: pallet_conviction_voting,
 		Whitelist: pallet_whitelist,
 		NominationPools: pallet_nomination_pools,
+
+		// Smart contract
+		Contracts: pallet_contracts,
 		Ethereum: pallet_ethereum::{Pallet, Call, Storage, Event, Config, Origin},
 		EVM: pallet_evm::{Pallet, Config, Call, Storage, Event<T>},
 		DynamicFee: pallet_dynamic_fee::{Pallet, Call, Storage, Config, Inherent},
 		BaseFee: pallet_base_fee::{Pallet, Call, Storage, Config<T>, Event},
 		HotfixSufficients: pallet_hotfix_sufficients::{Pallet, Call},
+
+		// Address mapping
 		EvmAccounts: module_evm_accounts,
 	}
 );
