@@ -1,0 +1,41 @@
+[package]
+name = 'module-traits'
+authors = ['Clover Network <https://github.com/clover-network>']
+edition = '2018'
+license = 'GPL-3.0'
+homepage = 'https://clover.finance'
+repository = 'https://github.com/clover-network/clover'
+version = '0.9.0'
+
+[dependencies]
+# serde = { version = "1.0.101", optional = true }
+# byteorder = { version = "1.1.0", default-features = false }
+# codec = { package = "parity-scale-codec", version = "2.0.0", default-features = false }
+# num-traits = { version = "0.2", default-features = false}
+# num-derive= { version = "0.2", default-features = false}
+sp-runtime = { git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.23", default-features = false }
+# frame-benchmarking = { git = "https://github.com/paritytech/substrate.git",  tag = "v3.0.0" , default-features = false, optional = true }
+# frame-support = { git = "https://github.com/paritytech/substrate.git",  tag = "v3.0.0" , default-features = false }
+# frame-system = { git = "https://github.com/paritytech/substrate.git",  tag = "v3.0.0" , default-features = false }
+# sp-std = { git = "https://github.com/paritytech/substrate.git",  tag = "v3.0.0" , default-features = false }
+# pallet-balances = { git = "https://github.com/paritytech/substrate.git",  tag = "v3.0.0" , default-features = false }
+impl-trait-for-tuples = "0.1.3"
+orml-utilities = { git = "https://github.com/open-web3-stack/open-runtime-module-library.git", branch = "polkadot-v0.9.23", default-features = false }
+
+# [dev-dependencies]
+# sp-core = { git = "https://github.com/paritytech/substrate.git",  tag = "v3.0.0" , default-features = false }
+# sp-io = { git = "https://github.com/paritytech/substrate.git",  tag = "v3.0.0" , default-features = false }
+
+[features]
+default = ['std']
+std = [
+  # 'byteorder/std',
+  # 'frame-support/std',
+  # 'frame-system/std',
+  'orml-utilities/std',
+  # 'pallet-balances/std',
+  # 'node-primitives/std',
+  # 'serde',
+  'sp-runtime/std',
+  # 'sp-std/std',
+]

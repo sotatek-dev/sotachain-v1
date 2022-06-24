@@ -119,6 +119,10 @@ pallet-evm-precompile-blake2 = { default-features = false, git = "https://github
 pallet-evm-precompile-dispatch = { default-features = false, git = "https://github.com/sotatek-dev/frontier.git", branch = "polkadot-v0.9.23" }
 pallet-hotfix-sufficients = { default-features = false, git = "https://github.com/sotatek-dev/frontier.git", branch = "polkadot-v0.9.23" }
 
+# modules
+module-evm-accounts = { path = "../modules/evm-accounts", default-features = false }
+module-traits = { path = "../modules/traits", default-features = false }
+
 [build-dependencies]
 substrate-wasm-builder = { version = "5.0.0-dev", git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.23" }
 
@@ -210,6 +214,8 @@ std = [
 	"pallet-evm-precompile-sha3fips/std",
 	"pallet-evm-precompile-simple/std",
 	"pallet-hotfix-sufficients/std",
+
+	"module-evm-accounts/std",
 ]
 runtime-benchmarks = [
 	"frame-benchmarking/runtime-benchmarks",

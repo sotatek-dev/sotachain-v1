@@ -20,7 +20,7 @@
 
 #![cfg_attr(not(feature = "std"), no_std)]
 // `construct_runtime!` does a lot of recursion and requires us to increase the limit to 256.
-#![recursion_limit = "256"]
+#![recursion_limit = "512"]
 #![allow(clippy::new_without_default, clippy::or_fun_call)]
 
 use codec::{Decode, Encode, MaxEncodedLen};
@@ -89,6 +89,7 @@ use sp_std::{marker::PhantomData, prelude::*};
 use sp_version::NativeVersion;
 use sp_version::RuntimeVersion;
 use static_assertions::const_assert;
+use module_evm_accounts::EvmAddressMapping;
 
 #[cfg(any(feature = "std", test))]
 pub use frame_system::Call as SystemCall;
@@ -101,19 +102,18 @@ pub use pallet_sudo::Call as SudoCall;
 #[cfg(any(feature = "std", test))]
 pub use sp_runtime::BuildStorage;
 
+pub mod constants;
 /// Implementations of some helper traits passed into runtime modules as associated types.
 pub mod impls;
-use impls::{Author, CreditToBlockAuthor};
-
-/// Constant values used within the runtime.
-pub mod constants;
-use constants::{currency::*, time::*};
-use sp_runtime::generic::Era;
-
 /// Generated voter bag information.
 mod voter_bags;
-
 mod precompiles;
+mod weights;
+
+use impls::{Author, CreditToBlockAuthor, MergeAccountEvm};
+/// Constant values used within the runtime.
+use constants::{currency::*, time::*};
+use sp_runtime::generic::Era;
 use precompiles::FrontierPrecompiles;
 
 // Make the WASM binary available.
@@ -235,7 +235,10 @@ impl frame_system::Config for Runtime {
 	type PalletInfo = PalletInfo;
 	type AccountData = pallet_balances::AccountData<Balance>;
 	type OnNewAccount = ();
-	type OnKilledAccount = ();
+	type OnKilledAccount = (
+		// pallet_evm::CallKillAccount<Runtime>,
+		module_evm_accounts::CallKillAccount<Runtime>,
+	);
 	type SystemWeightInfo = frame_system::weights::SubstrateWeight<Runtime>;
 	type SS58Prefix = ConstU16<42>;
 	type OnSetCode = ();
@@ -1170,7 +1173,7 @@ impl GasWeightMapping for FixedGasWeightMapping {
 }
 
 parameter_types! {
-	pub const ChainId: u64 = 42;
+	pub const ChainId: u64 = 333;
 	pub BlockGasLimit: U256 = U256::from(NORMAL_DISPATCH_RATIO * MAXIMUM_BLOCK_WEIGHT / WEIGHT_PER_GAS);
 	pub PrecompilesValue: FrontierPrecompiles<Runtime> = FrontierPrecompiles::<_>::new();
 }
@@ -1181,7 +1184,7 @@ impl pallet_evm::Config for Runtime {
 	type BlockHashMapping = pallet_ethereum::EthereumBlockHashMapping<Self>;
 	type CallOrigin = EnsureAddressTruncated;
 	type WithdrawOrigin = EnsureAddressTruncated;
-	type AddressMapping = HashedAddressMapping<BlakeTwo256>;
+	type AddressMapping = EvmAddressMapping<Runtime>;
 	type Currency = Balances;
 	type Event = Event;
 	type Runner = pallet_evm::runner::stack::Runner<Self>;
@@ -1232,7 +1235,7 @@ impl pallet_base_fee::Config for Runtime {
 }
 
 impl pallet_hotfix_sufficients::Config for Runtime {
-	type AddressMapping = HashedAddressMapping<BlakeTwo256>;
+	type AddressMapping = EvmAddressMapping<Runtime>;
 	type WeightInfo = pallet_hotfix_sufficients::weights::SubstrateWeight<Runtime>;
 }
 
@@ -1582,6 +1585,16 @@ impl pallet_state_trie_migration::Config for Runtime {
 	type WeightInfo = ();
 }
 
+impl module_evm_accounts::Config for Runtime {
+	type Event = Event;
+	type Currency = Balances;
+	type AddressMapping = EvmAddressMapping<Runtime>;
+	// type TransferAll = Currencies;
+	type MergeAccount = MergeAccountEvm;
+	type ChainId = ChainId;
+	type WeightInfo = weights::module_evm_accounts::WeightInfo<Runtime>;
+}
+
 construct_runtime!(
 	pub enum Runtime where
 		Block = Block,
@@ -1645,6 +1658,7 @@ construct_runtime!(
 		DynamicFee: pallet_dynamic_fee::{Pallet, Call, Storage, Config, Inherent},
 		BaseFee: pallet_base_fee::{Pallet, Call, Storage, Config<T>, Event},
 		HotfixSufficients: pallet_hotfix_sufficients::{Pallet, Call},
+		EvmAccounts: module_evm_accounts,
 	}
 );
 

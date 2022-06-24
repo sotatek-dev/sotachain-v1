@@ -17,7 +17,7 @@
 
 //! Low-level types used throughout the Substrate code.
 
-#![warn(missing_docs)]
+// #![warn(missing_docs)]
 #![cfg_attr(not(feature = "std"), no_std)]
 
 use sp_runtime::{
@@ -25,6 +25,10 @@ use sp_runtime::{
 	traits::{BlakeTwo256, IdentifyAccount, Verify},
 	MultiSignature, OpaqueExtrinsic,
 };
+use sp_core::U256;
+
+/// evm
+pub mod evm;
 
 /// An index to a block.
 pub type BlockNumber = u32;
@@ -64,3 +68,8 @@ pub type Header = generic::Header<BlockNumber, BlakeTwo256>;
 pub type Block = generic::Block<Header, OpaqueExtrinsic>;
 /// Block ID.
 pub type BlockId = generic::BlockId<Block>;
+
+/// Convert any type that implements Into<U256> into byte representation ([u8, 32])
+pub fn to_bytes<T: Into<U256>>(value: T) -> [u8; 32] {
+	Into::<[u8; 32]>::into(value.into())
+}

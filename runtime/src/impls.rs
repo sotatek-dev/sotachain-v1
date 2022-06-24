@@ -20,9 +20,12 @@
 use crate::{AccountId, Assets, Authorship, Balances, NegativeImbalance, Runtime};
 use frame_support::traits::{
 	fungibles::{Balanced, CreditOf},
-	Currency, OnUnbalanced,
+	Currency, OnUnbalanced, ReservableCurrency
 };
 use pallet_asset_tx_payment::HandleCredit;
+use sp_runtime::{ DispatchResult };
+use module_traits::account::MergeAccount;
+use frame_support::transactional;
 
 pub struct Author;
 impl OnUnbalanced<NegativeImbalance> for Author {
@@ -43,6 +46,21 @@ impl HandleCredit<AccountId, Assets> for CreditToBlockAuthor {
 			let _ = Assets::resolve(&author, credit);
 		}
 	}
+}
+
+pub struct MergeAccountEvm;
+impl MergeAccount<AccountId> for MergeAccountEvm {
+#[transactional]
+fn merge_account(source: &AccountId, dest: &AccountId) -> DispatchResult {
+     // unreserve all reserved currency
+     <Balances as ReservableCurrency<_>>::unreserve(source, Balances::reserved_balance(source));
+
+     // transfer all free to dest
+     match Balances::transfer(Some(source.clone()).into(), dest.clone().into(), Balances::free_balance(source)) {
+       Ok(_) => Ok(()),
+       Err(e) => Err(e.error),
+     }
+  }
 }
 
 #[cfg(test)]

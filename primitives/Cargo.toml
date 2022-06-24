@@ -11,6 +11,7 @@ repository = "https://github.com/paritytech/substrate/"
 targets = ["x86_64-unknown-linux-gnu"]
 
 [dependencies]
+serde = { version = "1.0.136", optional = true }
 codec = { package = "parity-scale-codec", version = "3.0.0", default-features = false, features = [
 	"derive",
 ] }
@@ -19,14 +20,20 @@ frame-system = { version = "4.0.0-dev", default-features = false, git = "https:/
 sp-application-crypto = { version = "6.0.0", default-features = false, git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.23" }
 sp-core = { version = "6.0.0", default-features = false, git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.23" }
 sp-runtime = { version = "6.0.0", default-features = false, git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.23" }
+sp-std = { version = "4.0.0", default-features = false, git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.23" }
+module-evm-utility = { path = "../modules/evm-utility", default-features = false }
+module-evm-utility-macro = { path = "../modules/evm-utility/macro" }
 
 [features]
 default = ["std"]
 std = [
+	"serde",
 	"codec/std",
 	"frame-system/std",
 	"scale-info/std",
 	"sp-application-crypto/std",
 	"sp-core/std",
 	"sp-runtime/std",
+	"sp-std/std",
+	"module-evm-utility/std",
 ]

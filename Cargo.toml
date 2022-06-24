@@ -7,7 +7,9 @@ members = [
     "node/rpc",
     "node/testing",
     "runtime",
-    "primitives"
+    "primitives",
+    "modules/*",
+	"modules/evm-utility/macro",
 ]
 exclude = [
     'examples/flipper'
