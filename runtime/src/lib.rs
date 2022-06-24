@@ -236,7 +236,7 @@ impl frame_system::Config for Runtime {
 	type AccountData = pallet_balances::AccountData<Balance>;
 	type OnNewAccount = ();
 	type OnKilledAccount = (
-		// pallet_evm::CallKillAccount<Runtime>,
+		pallet_evm::CallKillAccount<Runtime>,
 		module_evm_accounts::CallKillAccount<Runtime>,
 	);
 	type SystemWeightInfo = frame_system::weights::SubstrateWeight<Runtime>;

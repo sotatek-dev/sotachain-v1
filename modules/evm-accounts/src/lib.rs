@@ -361,6 +361,22 @@ where
 			AccountId32::from(data).into()
 		}
 	}
+
+	// Returns the EvmAddress associated with a given AccountId or the
+	// underlying EvmAddress of the AccountId.
+	// Returns None if there is no EvmAddress associated with the AccountId
+	// and there is no underlying EvmAddress in the AccountId.
+	fn into_evm_address(account_id: &T::AccountId) -> Option<H160> {
+		// Return the EvmAddress if a mapping to account_id exists
+		EvmAddresses::<T>::get(account_id).or_else(|| {
+			let data: [u8; 32] = account_id.clone().into().into();
+			if data.starts_with(b"evm:") {
+				Some(H160::from_slice(&data[4..24]))
+			} else {
+				None
+			}
+		})
+	}
 }
 
 pub struct CallKillAccount<T>(PhantomData<T>);
