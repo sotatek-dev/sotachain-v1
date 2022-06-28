@@ -19,7 +19,7 @@ import { Wallet } from "ethers";
   console.log({chainId})
 
   const domain = {
-    name: "Acala EVM claim",
+    name: "Sota EVM claim",
     version: "1",
     chainId: chainId.toString(),
     salt,
