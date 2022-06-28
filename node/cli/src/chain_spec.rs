@@ -25,7 +25,7 @@ use node_runtime::{
 	BalancesConfig, Block, CouncilConfig, DemocracyConfig, EVMConfig, ElectionsConfig,
 	EthereumConfig, GrandpaConfig, ImOnlineConfig, IndicesConfig, MaxNominations, SessionConfig,
 	SessionKeys, SocietyConfig, StakerStatus, StakingConfig, SudoConfig, SystemConfig,
-	TechnicalCommitteeConfig, TokensConfig, CurrencyId,
+	TechnicalCommitteeConfig, TokensConfig,
 };
 use pallet_im_online::sr25519::AuthorityId as ImOnlineId;
 use sc_chain_spec::ChainSpecExtension;

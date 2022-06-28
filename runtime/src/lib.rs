@@ -1660,28 +1660,49 @@ construct_runtime!(
 		NodeBlock = node_primitives::Block,
 		UncheckedExtrinsic = UncheckedExtrinsic
 	{
+		// Core & Utility
 		System: frame_system,
-		Utility: pallet_utility,
-		Babe: pallet_babe,
 		Timestamp: pallet_timestamp,
+		Scheduler: pallet_scheduler,
+		Utility: pallet_utility,
+		Multisig: pallet_multisig,
+		Proxy: pallet_proxy,
+		Preimage: pallet_preimage,
+
+		// Tokens & Related
+		Balances: pallet_balances,
+		Currencies: orml_currencies,
+		Tokens: orml_tokens,
+		TransactionPayment: pallet_transaction_payment,
+		Vesting: pallet_vesting,
+		Assets: pallet_assets,
+		Uniques: pallet_uniques,
+
+		// Treasury
+		Treasury: pallet_treasury,
+		Bounties: pallet_bounties,
+		Tips: pallet_tips,
+
+		// Collator. The order of the 4 below are important and shall not change.
 		// Authorship must be before session in order to note author in the correct session and era
 		// for im-online and staking.
 		Authorship: pallet_authorship,
+		Session: pallet_session,
+		Babe: pallet_babe,
+
+		// Governance
+		Council: pallet_collective::<Instance1>,
+		TechnicalCommittee: pallet_collective::<Instance2>,
+		TechnicalMembership: pallet_membership::<Instance1>,
+
+		// Others
 		Indices: pallet_indices,
-		Balances: pallet_balances,
-		TransactionPayment: pallet_transaction_payment,
 		AssetTxPayment: pallet_asset_tx_payment,
 		ElectionProviderMultiPhase: pallet_election_provider_multi_phase,
 		Staking: pallet_staking,
-		Session: pallet_session,
 		Democracy: pallet_democracy,
-		Council: pallet_collective::<Instance1>,
-		TechnicalCommittee: pallet_collective::<Instance2>,
 		Elections: pallet_elections_phragmen,
-		TechnicalMembership: pallet_membership::<Instance1>,
 		Grandpa: pallet_grandpa,
-		Treasury: pallet_treasury,
-		Sudo: pallet_sudo,
 		ImOnline: pallet_im_online,
 		AuthorityDiscovery: pallet_authority_discovery,
 		Offences: pallet_offences,
@@ -1690,18 +1711,9 @@ construct_runtime!(
 		Identity: pallet_identity,
 		Society: pallet_society,
 		Recovery: pallet_recovery,
-		Vesting: pallet_vesting,
-		Scheduler: pallet_scheduler,
-		Preimage: pallet_preimage,
-		Proxy: pallet_proxy,
-		Multisig: pallet_multisig,
-		Bounties: pallet_bounties,
-		Tips: pallet_tips,
-		Assets: pallet_assets,
 		Mmr: pallet_mmr,
 		Lottery: pallet_lottery,
 		// Gilt: pallet_gilt,
-		Uniques: pallet_uniques,
 		TransactionStorage: pallet_transaction_storage,
 		BagsList: pallet_bags_list,
 		// StateTrieMigration: pallet_state_trie_migration,
@@ -1719,13 +1731,10 @@ construct_runtime!(
 		DynamicFee: pallet_dynamic_fee::{Pallet, Call, Storage, Config, Inherent},
 		BaseFee: pallet_base_fee::{Pallet, Call, Storage, Config<T>, Event},
 		HotfixSufficients: pallet_hotfix_sufficients::{Pallet, Call},
-
-		// orml
-		Currencies: orml_currencies,
-		Tokens: orml_tokens,
-
-		// Address mapping
 		EvmAccounts: module_evm_accounts,
+
+		// Temporary
+		Sudo: pallet_sudo,
 	}
 );
 
