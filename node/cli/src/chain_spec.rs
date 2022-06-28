@@ -25,7 +25,7 @@ use node_runtime::{
 	BalancesConfig, Block, CouncilConfig, DemocracyConfig, EVMConfig, ElectionsConfig,
 	EthereumConfig, GrandpaConfig, ImOnlineConfig, IndicesConfig, MaxNominations, SessionConfig,
 	SessionKeys, SocietyConfig, StakerStatus, StakingConfig, SudoConfig, SystemConfig,
-	TechnicalCommitteeConfig,
+	TechnicalCommitteeConfig, TokensConfig, CurrencyId,
 };
 use pallet_im_online::sr25519::AuthorityId as ImOnlineId;
 use sc_chain_spec::ChainSpecExtension;
@@ -434,6 +434,18 @@ pub fn testnet_genesis(
 		ethereum: EthereumConfig {},
 		dynamic_fee: Default::default(),
 		base_fee: Default::default(),
+		tokens: TokensConfig { balances: vec![] },
+		// tokens: TokensConfig {
+		// 	endowed_accounts: endowed_accounts
+		// 	.iter()
+		// 	.flat_map(|x| {
+		// 		vec![
+		// 			(x.clone(), CurrencyId::DOT, 10u128.pow(16)),
+		// 			(x.clone(), CurrencyId::BTC, 10u128.pow(16)),
+		// 		]
+		// 	})
+		// 	.collect(),
+		// },
 	}
 }
 

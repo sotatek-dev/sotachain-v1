@@ -76,7 +76,7 @@ use sp_runtime::{
 	generic, impl_opaque_keys,
 	traits::{
 		self, BlakeTwo256, Block as BlockT, ConvertInto, DispatchInfoOf, Dispatchable, NumberFor,
-		OpaqueKeys, PostDispatchInfoOf, SaturatedConversion, StaticLookup,
+		OpaqueKeys, PostDispatchInfoOf, SaturatedConversion, StaticLookup, AccountIdConversion,
 	},
 	transaction_validity::{
 		TransactionPriority, TransactionSource, TransactionValidity, TransactionValidityError,
@@ -90,6 +90,11 @@ use sp_version::NativeVersion;
 use sp_version::RuntimeVersion;
 use static_assertions::const_assert;
 use module_evm_accounts::EvmAddressMapping;
+use orml_currencies::BasicCurrencyAdapter;
+use orml_traits::parameter_type_with_key;
+
+#[cfg(feature = "std")]
+use serde::{Deserialize, Serialize};
 
 #[cfg(any(feature = "std", test))]
 pub use frame_system::Call as SystemCall;
@@ -1595,6 +1600,60 @@ impl module_evm_accounts::Config for Runtime {
 	type WeightInfo = weights::module_evm_accounts::WeightInfo<Runtime>;
 }
 
+#[derive(Encode, Decode, RuntimeDebug, Eq, PartialEq, Clone, Copy, Ord, PartialOrd, scale_info::TypeInfo, MaxEncodedLen)]
+#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
+pub enum CurrencyId {
+	Native,
+	DOT,
+	KSM,
+	BTC,
+}
+impl Default for CurrencyId {
+	fn default() -> Self {
+		Self::Native
+	}
+}
+
+type Amount = i64;
+pub type ReserveIdentifier = [u8; 8];
+
+parameter_type_with_key! {
+	pub ExistentialDeposits: |_currency_id: CurrencyId| -> Balance {
+		Default::default()
+	};
+}
+
+parameter_types! {
+	pub DustAccount: AccountId = PalletId(*b"orml/dst").into_account_truncating();
+}
+
+impl orml_tokens::Config for Runtime {
+	type Event = Event;
+	type Balance = Balance;
+	type Amount = Amount;
+	type CurrencyId = CurrencyId;
+	type WeightInfo = ();
+	type ExistentialDeposits = ExistentialDeposits;
+	type OnDust = orml_tokens::TransferDust<Runtime, DustAccount>;
+	type MaxLocks = ConstU32<100_000>;
+	type MaxReserves = ConstU32<100_000>;
+	type ReserveIdentifier = ReserveIdentifier;
+	type DustRemovalWhitelist = Nothing;
+}
+
+pub const NATIVE_CURRENCY_ID: CurrencyId = CurrencyId::Native;
+
+parameter_types! {
+	pub const GetNativeCurrencyId: CurrencyId = NATIVE_CURRENCY_ID;
+}
+
+impl orml_currencies::Config for Runtime {
+	type MultiCurrency = Tokens;
+	type NativeCurrency = BasicCurrencyAdapter<Runtime, Balances, Amount, BlockNumber>;
+	type GetNativeCurrencyId = GetNativeCurrencyId;
+	type WeightInfo = ();
+}
+
 construct_runtime!(
 	pub enum Runtime where
 		Block = Block,
@@ -1660,6 +1719,10 @@ construct_runtime!(
 		DynamicFee: pallet_dynamic_fee::{Pallet, Call, Storage, Config, Inherent},
 		BaseFee: pallet_base_fee::{Pallet, Call, Storage, Config<T>, Event},
 		HotfixSufficients: pallet_hotfix_sufficients::{Pallet, Call},
+
+		// orml
+		Currencies: orml_currencies,
+		Tokens: orml_tokens,
 
 		// Address mapping
 		EvmAccounts: module_evm_accounts,
