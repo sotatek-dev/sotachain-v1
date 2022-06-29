@@ -186,7 +186,7 @@ where
 	C: BlockchainEvents<Block>,
 	C::Api: substrate_frame_rpc_system::AccountNonceApi<Block, AccountId, Index>,
 	C::Api: pallet_contracts_rpc::ContractsRuntimeApi<Block, AccountId, Balance, BlockNumber, Hash>,
-	C::Api: pallet_mmr_rpc::MmrRuntimeApi<Block, <Block as sp_runtime::traits::Block>::Hash>,
+	// C::Api: pallet_mmr_rpc::MmrRuntimeApi<Block, <Block as sp_runtime::traits::Block>::Hash>,
 	C::Api: pallet_transaction_payment_rpc::TransactionPaymentRuntimeApi<Block, Balance>,
 	C::Api: BabeApi<Block>,
 	C::Api: BlockBuilder<Block>,
@@ -199,7 +199,7 @@ where
 	P: TransactionPool<Block = Block> + 'static,
 {
 	use pallet_contracts_rpc::{Contracts, ContractsApiServer};
-	use pallet_mmr_rpc::{Mmr, MmrApiServer};
+	// use pallet_mmr_rpc::{Mmr, MmrApiServer};
 	use pallet_transaction_payment_rpc::{TransactionPayment, TransactionPaymentApiServer};
 	use sc_consensus_babe_rpc::{Babe, BabeApiServer};
 	use sc_finality_grandpa_rpc::{Grandpa, GrandpaApiServer};
@@ -248,7 +248,7 @@ where
 	// more context: https://github.com/paritytech/substrate/pull/3480
 	// These RPCs should use an asynchronous caller instead.
 	io.merge(Contracts::new(client.clone()).into_rpc())?;
-	io.merge(Mmr::new(client.clone()).into_rpc())?;
+	// io.merge(Mmr::new(client.clone()).into_rpc())?;
 	io.merge(TransactionPayment::new(client.clone()).into_rpc())?;
 	io.merge(
 		Babe::new(

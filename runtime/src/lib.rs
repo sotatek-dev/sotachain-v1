@@ -324,7 +324,8 @@ impl InstanceFilter<Call> for ProxyType {
 			ProxyType::Governance => matches!(
 				c,
 				Call::Democracy(..)
-					| Call::Council(..) | Call::Society(..)
+					| Call::Council(..)
+					// | Call::Society(..)
 					| Call::TechnicalCommittee(..)
 					| Call::Elections(..)
 					| Call::Treasury(..)
@@ -1002,18 +1003,18 @@ type EnsureRootOrHalfCouncil = EnsureOneOf<
 	EnsureRoot<AccountId>,
 	pallet_collective::EnsureProportionMoreThan<AccountId, CouncilCollective, 1, 2>,
 >;
-impl pallet_membership::Config<pallet_membership::Instance1> for Runtime {
-	type Event = Event;
-	type AddOrigin = EnsureRootOrHalfCouncil;
-	type RemoveOrigin = EnsureRootOrHalfCouncil;
-	type SwapOrigin = EnsureRootOrHalfCouncil;
-	type ResetOrigin = EnsureRootOrHalfCouncil;
-	type PrimeOrigin = EnsureRootOrHalfCouncil;
-	type MembershipInitialized = TechnicalCommittee;
-	type MembershipChanged = TechnicalCommittee;
-	type MaxMembers = TechnicalMaxMembers;
-	type WeightInfo = pallet_membership::weights::SubstrateWeight<Runtime>;
-}
+// impl pallet_membership::Config<pallet_membership::Instance1> for Runtime {
+// 	type Event = Event;
+// 	type AddOrigin = EnsureRootOrHalfCouncil;
+// 	type RemoveOrigin = EnsureRootOrHalfCouncil;
+// 	type SwapOrigin = EnsureRootOrHalfCouncil;
+// 	type ResetOrigin = EnsureRootOrHalfCouncil;
+// 	type PrimeOrigin = EnsureRootOrHalfCouncil;
+// 	type MembershipInitialized = TechnicalCommittee;
+// 	type MembershipChanged = TechnicalCommittee;
+// 	type MaxMembers = TechnicalMaxMembers;
+// 	type WeightInfo = pallet_membership::weights::SubstrateWeight<Runtime>;
+// }
 
 parameter_types! {
 	pub const ProposalBond: Permill = Permill::from_percent(5);
@@ -1410,24 +1411,24 @@ parameter_types! {
 	pub const SocietyPalletId: PalletId = PalletId(*b"py/socie");
 }
 
-impl pallet_society::Config for Runtime {
-	type Event = Event;
-	type PalletId = SocietyPalletId;
-	type Currency = Balances;
-	type Randomness = RandomnessCollectiveFlip;
-	type CandidateDeposit = CandidateDeposit;
-	type WrongSideDeduction = WrongSideDeduction;
-	type MaxStrikes = MaxStrikes;
-	type PeriodSpend = PeriodSpend;
-	type MembershipChanged = ();
-	type RotationPeriod = RotationPeriod;
-	type MaxLockDuration = MaxLockDuration;
-	type FounderSetOrigin =
-		pallet_collective::EnsureProportionMoreThan<AccountId, CouncilCollective, 1, 2>;
-	type SuspensionJudgementOrigin = pallet_society::EnsureFounder<Runtime>;
-	type MaxCandidateIntake = MaxCandidateIntake;
-	type ChallengePeriod = ChallengePeriod;
-}
+// impl pallet_society::Config for Runtime {
+// 	type Event = Event;
+// 	type PalletId = SocietyPalletId;
+// 	type Currency = Balances;
+// 	type Randomness = RandomnessCollectiveFlip;
+// 	type CandidateDeposit = CandidateDeposit;
+// 	type WrongSideDeduction = WrongSideDeduction;
+// 	type MaxStrikes = MaxStrikes;
+// 	type PeriodSpend = PeriodSpend;
+// 	type MembershipChanged = ();
+// 	type RotationPeriod = RotationPeriod;
+// 	type MaxLockDuration = MaxLockDuration;
+// 	type FounderSetOrigin =
+// 		pallet_collective::EnsureProportionMoreThan<AccountId, CouncilCollective, 1, 2>;
+// 	type SuspensionJudgementOrigin = pallet_society::EnsureFounder<Runtime>;
+// 	type MaxCandidateIntake = MaxCandidateIntake;
+// 	type ChallengePeriod = ChallengePeriod;
+// }
 
 parameter_types! {
 	pub const MinVestedTransfer: Balance = 100 * DOLLARS;
@@ -1444,14 +1445,14 @@ impl pallet_vesting::Config for Runtime {
 	const MAX_VESTING_SCHEDULES: u32 = 28;
 }
 
-impl pallet_mmr::Config for Runtime {
-	const INDEXING_PREFIX: &'static [u8] = b"mmr";
-	type Hashing = <Runtime as frame_system::Config>::Hashing;
-	type Hash = <Runtime as frame_system::Config>::Hash;
-	type LeafData = pallet_mmr::ParentNumberAndHash<Self>;
-	type OnNewRoot = ();
-	type WeightInfo = ();
-}
+// impl pallet_mmr::Config for Runtime {
+// 	const INDEXING_PREFIX: &'static [u8] = b"mmr";
+// 	type Hashing = <Runtime as frame_system::Config>::Hashing;
+// 	type Hash = <Runtime as frame_system::Config>::Hash;
+// 	type LeafData = pallet_mmr::ParentNumberAndHash<Self>;
+// 	type OnNewRoot = ();
+// 	type WeightInfo = ();
+// }
 
 parameter_types! {
 	pub const LotteryPalletId: PalletId = PalletId(*b"py/lotto");
@@ -1459,18 +1460,18 @@ parameter_types! {
 	pub const MaxGenerateRandom: u32 = 10;
 }
 
-impl pallet_lottery::Config for Runtime {
-	type PalletId = LotteryPalletId;
-	type Call = Call;
-	type Currency = Balances;
-	type Randomness = RandomnessCollectiveFlip;
-	type Event = Event;
-	type ManagerOrigin = EnsureRoot<AccountId>;
-	type MaxCalls = MaxCalls;
-	type ValidateCall = Lottery;
-	type MaxGenerateRandom = MaxGenerateRandom;
-	type WeightInfo = pallet_lottery::weights::SubstrateWeight<Runtime>;
-}
+// impl pallet_lottery::Config for Runtime {
+// 	type PalletId = LotteryPalletId;
+// 	type Call = Call;
+// 	type Currency = Balances;
+// 	type Randomness = RandomnessCollectiveFlip;
+// 	type Event = Event;
+// 	type ManagerOrigin = EnsureRoot<AccountId>;
+// 	type MaxCalls = MaxCalls;
+// 	type ValidateCall = Lottery;
+// 	type MaxGenerateRandom = MaxGenerateRandom;
+// 	type WeightInfo = pallet_lottery::weights::SubstrateWeight<Runtime>;
+// }
 
 parameter_types! {
 	pub const AssetDeposit: Balance = 100 * DOLLARS;
@@ -1554,22 +1555,22 @@ impl pallet_uniques::Config for Runtime {
 	type Locker = ();
 }
 
-impl pallet_transaction_storage::Config for Runtime {
-	type Event = Event;
-	type Currency = Balances;
-	type Call = Call;
-	type FeeDestination = ();
-	type WeightInfo = pallet_transaction_storage::weights::SubstrateWeight<Runtime>;
-}
+// impl pallet_transaction_storage::Config for Runtime {
+// 	type Event = Event;
+// 	type Currency = Balances;
+// 	type Call = Call;
+// 	type FeeDestination = ();
+// 	type WeightInfo = pallet_transaction_storage::weights::SubstrateWeight<Runtime>;
+// }
 
-impl pallet_whitelist::Config for Runtime {
-	type Event = Event;
-	type Call = Call;
-	type WhitelistOrigin = EnsureRoot<AccountId>;
-	type DispatchWhitelistedOrigin = EnsureRoot<AccountId>;
-	type PreimageProvider = Preimage;
-	type WeightInfo = pallet_whitelist::weights::SubstrateWeight<Runtime>;
-}
+// impl pallet_whitelist::Config for Runtime {
+// 	type Event = Event;
+// 	type Call = Call;
+// 	type WhitelistOrigin = EnsureRoot<AccountId>;
+// 	type DispatchWhitelistedOrigin = EnsureRoot<AccountId>;
+// 	type PreimageProvider = Preimage;
+// 	type WeightInfo = pallet_whitelist::weights::SubstrateWeight<Runtime>;
+// }
 
 // parameter_types! {
 // 	pub const MigrationSignedDepositPerItem: Balance = 1 * CENTS;
@@ -1689,39 +1690,39 @@ construct_runtime!(
 		Authorship: pallet_authorship,
 		Session: pallet_session,
 		Babe: pallet_babe,
+		Staking: pallet_staking,
+		Grandpa: pallet_grandpa,
+		ImOnline: pallet_im_online,
 
 		// Governance
 		Council: pallet_collective::<Instance1>,
 		TechnicalCommittee: pallet_collective::<Instance2>,
-		TechnicalMembership: pallet_membership::<Instance1>,
+		// TechnicalMembership: pallet_membership::<Instance1>,
 
 		// Others
 		Indices: pallet_indices,
 		AssetTxPayment: pallet_asset_tx_payment,
 		ElectionProviderMultiPhase: pallet_election_provider_multi_phase,
-		Staking: pallet_staking,
 		Democracy: pallet_democracy,
 		Elections: pallet_elections_phragmen,
-		Grandpa: pallet_grandpa,
-		ImOnline: pallet_im_online,
 		AuthorityDiscovery: pallet_authority_discovery,
 		Offences: pallet_offences,
 		Historical: pallet_session_historical::{Pallet},
 		RandomnessCollectiveFlip: pallet_randomness_collective_flip,
 		Identity: pallet_identity,
-		Society: pallet_society,
+		// Society: pallet_society,
 		Recovery: pallet_recovery,
-		Mmr: pallet_mmr,
-		Lottery: pallet_lottery,
+		// Mmr: pallet_mmr,
+		// Lottery: pallet_lottery,
 		// Gilt: pallet_gilt,
-		TransactionStorage: pallet_transaction_storage,
+		// TransactionStorage: pallet_transaction_storage,
 		BagsList: pallet_bags_list,
 		// StateTrieMigration: pallet_state_trie_migration,
 		ChildBounties: pallet_child_bounties,
 		Referenda: pallet_referenda,
 		Remark: pallet_remark,
 		ConvictionVoting: pallet_conviction_voting,
-		Whitelist: pallet_whitelist,
+		// Whitelist: pallet_whitelist,
 		NominationPools: pallet_nomination_pools,
 
 		// Smart contract
@@ -1805,15 +1806,15 @@ pub type Executive = frame_executive::Executive<
 	(),
 >;
 
-/// MMR helper types.
-mod mmr {
-	use super::Runtime;
-	pub use pallet_mmr::primitives::*;
+// /// MMR helper types.
+// mod mmr {
+// 	use super::Runtime;
+// 	pub use pallet_mmr::primitives::*;
 
-	pub type Leaf = <<Runtime as pallet_mmr::Config>::LeafData as LeafDataProvider>::LeafData;
-	pub type Hash = <Runtime as pallet_mmr::Config>::Hash;
-	pub type Hashing = <Runtime as pallet_mmr::Config>::Hashing;
-}
+// 	pub type Leaf = <<Runtime as pallet_mmr::Config>::LeafData as LeafDataProvider>::LeafData;
+// 	pub type Hash = <Runtime as pallet_mmr::Config>::Hash;
+// 	pub type Hashing = <Runtime as pallet_mmr::Config>::Hashing;
+// }
 
 impl fp_self_contained::SelfContainedCall for Call {
 	type SignedInfo = H160;
@@ -1893,9 +1894,9 @@ mod benches {
 		[pallet_identity, Identity]
 		[pallet_im_online, ImOnline]
 		[pallet_indices, Indices]
-		[pallet_lottery, Lottery]
-		[pallet_membership, TechnicalMembership]
-		[pallet_mmr, Mmr]
+		// [pallet_lottery, Lottery]
+		// [pallet_membership, TechnicalMembership]
+		// [pallet_mmr, Mmr]
 		[pallet_multisig, Multisig]
 		[pallet_nomination_pools, NominationPoolsBench::<Runtime>]
 		[pallet_offences, OffencesBench::<Runtime>]
@@ -1911,12 +1912,12 @@ mod benches {
 		[frame_system, SystemBench::<Runtime>]
 		[pallet_timestamp, Timestamp]
 		[pallet_tips, Tips]
-		[pallet_transaction_storage, TransactionStorage]
+		// [pallet_transaction_storage, TransactionStorage]
 		[pallet_treasury, Treasury]
 		[pallet_uniques, Uniques]
 		[pallet_utility, Utility]
 		[pallet_vesting, Vesting]
-		[pallet_whitelist, Whitelist],
+		// [pallet_whitelist, Whitelist],
 		[pallet_evm, EVM],
 	);
 }
@@ -2135,70 +2136,70 @@ impl_runtime_apis! {
 		}
 	}
 
-	impl pallet_mmr::primitives::MmrApi<
-		Block,
-		mmr::Hash,
-	> for Runtime {
-		fn generate_proof(leaf_index: pallet_mmr::primitives::LeafIndex)
-			-> Result<(mmr::EncodableOpaqueLeaf, mmr::Proof<mmr::Hash>), mmr::Error>
-		{
-			Mmr::generate_batch_proof(vec![leaf_index]).and_then(|(leaves, proof)|
-				Ok((
-					mmr::EncodableOpaqueLeaf::from_leaf(&leaves[0]),
-					mmr::BatchProof::into_single_leaf_proof(proof)?
-				))
-			)
-		}
+	// impl pallet_mmr::primitives::MmrApi<
+	// 	Block,
+	// 	mmr::Hash,
+	// > for Runtime {
+	// 	fn generate_proof(leaf_index: pallet_mmr::primitives::LeafIndex)
+	// 		-> Result<(mmr::EncodableOpaqueLeaf, mmr::Proof<mmr::Hash>), mmr::Error>
+	// 	{
+	// 		Mmr::generate_batch_proof(vec![leaf_index]).and_then(|(leaves, proof)|
+	// 			Ok((
+	// 				mmr::EncodableOpaqueLeaf::from_leaf(&leaves[0]),
+	// 				mmr::BatchProof::into_single_leaf_proof(proof)?
+	// 			))
+	// 		)
+	// 	}
 
-		fn verify_proof(leaf: mmr::EncodableOpaqueLeaf, proof: mmr::Proof<mmr::Hash>)
-			-> Result<(), mmr::Error>
-		{
-			let leaf: mmr::Leaf = leaf
-				.into_opaque_leaf()
-				.try_decode()
-				.ok_or(mmr::Error::Verify)?;
-			Mmr::verify_leaves(vec![leaf], mmr::Proof::into_batch_proof(proof))
-		}
+	// 	fn verify_proof(leaf: mmr::EncodableOpaqueLeaf, proof: mmr::Proof<mmr::Hash>)
+	// 		-> Result<(), mmr::Error>
+	// 	{
+	// 		let leaf: mmr::Leaf = leaf
+	// 			.into_opaque_leaf()
+	// 			.try_decode()
+	// 			.ok_or(mmr::Error::Verify)?;
+	// 		Mmr::verify_leaves(vec![leaf], mmr::Proof::into_batch_proof(proof))
+	// 	}
 
-		fn verify_proof_stateless(
-			root: mmr::Hash,
-			leaf: mmr::EncodableOpaqueLeaf,
-			proof: mmr::Proof<mmr::Hash>
-		) -> Result<(), mmr::Error> {
-			let node = mmr::DataOrHash::Data(leaf.into_opaque_leaf());
-			pallet_mmr::verify_leaves_proof::<mmr::Hashing, _>(root, vec![node], mmr::Proof::into_batch_proof(proof))
-		}
+	// 	fn verify_proof_stateless(
+	// 		root: mmr::Hash,
+	// 		leaf: mmr::EncodableOpaqueLeaf,
+	// 		proof: mmr::Proof<mmr::Hash>
+	// 	) -> Result<(), mmr::Error> {
+	// 		let node = mmr::DataOrHash::Data(leaf.into_opaque_leaf());
+	// 		pallet_mmr::verify_leaves_proof::<mmr::Hashing, _>(root, vec![node], mmr::Proof::into_batch_proof(proof))
+	// 	}
 
-		fn mmr_root() -> Result<mmr::Hash, mmr::Error> {
-			Ok(Mmr::mmr_root())
-		}
+	// 	fn mmr_root() -> Result<mmr::Hash, mmr::Error> {
+	// 		Ok(Mmr::mmr_root())
+	// 	}
 
-		fn generate_batch_proof(leaf_indices: Vec<pallet_mmr::primitives::LeafIndex>)
-			-> Result<(Vec<mmr::EncodableOpaqueLeaf>, mmr::BatchProof<mmr::Hash>), mmr::Error>
-		{
-			Mmr::generate_batch_proof(leaf_indices)
-				.map(|(leaves, proof)| (leaves.into_iter().map(|leaf| mmr::EncodableOpaqueLeaf::from_leaf(&leaf)).collect(), proof))
-		}
+	// 	fn generate_batch_proof(leaf_indices: Vec<pallet_mmr::primitives::LeafIndex>)
+	// 		-> Result<(Vec<mmr::EncodableOpaqueLeaf>, mmr::BatchProof<mmr::Hash>), mmr::Error>
+	// 	{
+	// 		Mmr::generate_batch_proof(leaf_indices)
+	// 			.map(|(leaves, proof)| (leaves.into_iter().map(|leaf| mmr::EncodableOpaqueLeaf::from_leaf(&leaf)).collect(), proof))
+	// 	}
 
-		fn verify_batch_proof(leaves: Vec<mmr::EncodableOpaqueLeaf>, proof: mmr::BatchProof<mmr::Hash>)
-			-> Result<(), mmr::Error>
-		{
-			let leaves = leaves.into_iter().map(|leaf|
-				leaf.into_opaque_leaf()
-				.try_decode()
-				.ok_or(mmr::Error::Verify)).collect::<Result<Vec<mmr::Leaf>, mmr::Error>>()?;
-			Mmr::verify_leaves(leaves, proof)
-		}
+	// 	fn verify_batch_proof(leaves: Vec<mmr::EncodableOpaqueLeaf>, proof: mmr::BatchProof<mmr::Hash>)
+	// 		-> Result<(), mmr::Error>
+	// 	{
+	// 		let leaves = leaves.into_iter().map(|leaf|
+	// 			leaf.into_opaque_leaf()
+	// 			.try_decode()
+	// 			.ok_or(mmr::Error::Verify)).collect::<Result<Vec<mmr::Leaf>, mmr::Error>>()?;
+	// 		Mmr::verify_leaves(leaves, proof)
+	// 	}
 
-		fn verify_batch_proof_stateless(
-			root: mmr::Hash,
-			leaves: Vec<mmr::EncodableOpaqueLeaf>,
-			proof: mmr::BatchProof<mmr::Hash>
-		) -> Result<(), mmr::Error> {
-			let nodes = leaves.into_iter().map(|leaf|mmr::DataOrHash::Data(leaf.into_opaque_leaf())).collect();
-			pallet_mmr::verify_leaves_proof::<mmr::Hashing, _>(root, nodes, proof)
-		}
-	}
+	// 	fn verify_batch_proof_stateless(
+	// 		root: mmr::Hash,
+	// 		leaves: Vec<mmr::EncodableOpaqueLeaf>,
+	// 		proof: mmr::BatchProof<mmr::Hash>
+	// 	) -> Result<(), mmr::Error> {
+	// 		let nodes = leaves.into_iter().map(|leaf|mmr::DataOrHash::Data(leaf.into_opaque_leaf())).collect();
+	// 		pallet_mmr::verify_leaves_proof::<mmr::Hashing, _>(root, nodes, proof)
+	// 	}
+	// }
 
 	impl sp_session::SessionKeys<Block> for Runtime {
 		fn generate_session_keys(seed: Option<Vec<u8>>) -> Vec<u8> {

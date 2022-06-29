@@ -24,7 +24,9 @@ use node_runtime::{
 	constants::currency::*, wasm_binary_unwrap, AuthorityDiscoveryConfig, BabeConfig,
 	BalancesConfig, Block, CouncilConfig, DemocracyConfig, EVMConfig, ElectionsConfig,
 	EthereumConfig, GrandpaConfig, ImOnlineConfig, IndicesConfig, MaxNominations, SessionConfig,
-	SessionKeys, SocietyConfig, StakerStatus, StakingConfig, SudoConfig, SystemConfig,
+	SessionKeys,
+	// SocietyConfig,
+	StakerStatus, StakingConfig, SudoConfig, SystemConfig,
 	TechnicalCommitteeConfig, TokensConfig,
 };
 use pallet_im_online::sr25519::AuthorityId as ImOnlineId;
@@ -358,21 +360,21 @@ pub fn testnet_genesis(
 		im_online: ImOnlineConfig { keys: vec![] },
 		authority_discovery: AuthorityDiscoveryConfig { keys: vec![] },
 		grandpa: GrandpaConfig { authorities: vec![] },
-		technical_membership: Default::default(),
+		// technical_membership: Default::default(),
 		treasury: Default::default(),
-		society: SocietyConfig {
-			members: endowed_accounts
-				.iter()
-				.take((num_endowed_accounts + 1) / 2)
-				.cloned()
-				.collect(),
-			pot: 0,
-			max_members: 999,
-		},
+		// society: SocietyConfig {
+		// 	members: endowed_accounts
+		// 		.iter()
+		// 		.take((num_endowed_accounts + 1) / 2)
+		// 		.cloned()
+		// 		.collect(),
+		// 	pot: 0,
+		// 	max_members: 999,
+		// },
 		vesting: Default::default(),
 		assets: Default::default(),
 		// gilt: Default::default(),
-		transaction_storage: Default::default(),
+		// transaction_storage: Default::default(),
 		transaction_payment: Default::default(),
 		nomination_pools: Default::default(),
 		evm: EVMConfig {
