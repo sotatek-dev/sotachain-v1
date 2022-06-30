@@ -1091,16 +1091,16 @@ impl pallet_child_bounties::Config for Runtime {
 	type WeightInfo = pallet_child_bounties::weights::SubstrateWeight<Runtime>;
 }
 
-impl pallet_tips::Config for Runtime {
-	type Event = Event;
-	type DataDepositPerByte = DataDepositPerByte;
-	type MaximumReasonLength = MaximumReasonLength;
-	type Tippers = Elections;
-	type TipCountdown = TipCountdown;
-	type TipFindersFee = TipFindersFee;
-	type TipReportDepositBase = TipReportDepositBase;
-	type WeightInfo = pallet_tips::weights::SubstrateWeight<Runtime>;
-}
+// impl pallet_tips::Config for Runtime {
+// 	type Event = Event;
+// 	type DataDepositPerByte = DataDepositPerByte;
+// 	type MaximumReasonLength = MaximumReasonLength;
+// 	type Tippers = Elections;
+// 	type TipCountdown = TipCountdown;
+// 	type TipFindersFee = TipFindersFee;
+// 	type TipReportDepositBase = TipReportDepositBase;
+// 	type WeightInfo = pallet_tips::weights::SubstrateWeight<Runtime>;
+// }
 
 parameter_types! {
 	pub const DepositPerItem: Balance = deposit(1, 0);
@@ -1454,11 +1454,11 @@ impl pallet_vesting::Config for Runtime {
 // 	type WeightInfo = ();
 // }
 
-parameter_types! {
-	pub const LotteryPalletId: PalletId = PalletId(*b"py/lotto");
-	pub const MaxCalls: u32 = 10;
-	pub const MaxGenerateRandom: u32 = 10;
-}
+// parameter_types! {
+// 	pub const LotteryPalletId: PalletId = PalletId(*b"py/lotto");
+// 	pub const MaxCalls: u32 = 10;
+// 	pub const MaxGenerateRandom: u32 = 10;
+// }
 
 // impl pallet_lottery::Config for Runtime {
 // 	type PalletId = LotteryPalletId;
@@ -1682,7 +1682,7 @@ construct_runtime!(
 		// Treasury
 		Treasury: pallet_treasury,
 		Bounties: pallet_bounties,
-		Tips: pallet_tips,
+		// Tips: pallet_tips,
 
 		// Collator. The order of the 4 below are important and shall not change.
 		// Authorship must be before session in order to note author in the correct session and era
@@ -1911,7 +1911,7 @@ mod benches {
 		// [pallet_state_trie_migration, StateTrieMigration]
 		[frame_system, SystemBench::<Runtime>]
 		[pallet_timestamp, Timestamp]
-		[pallet_tips, Tips]
+		// [pallet_tips, Tips]
 		// [pallet_transaction_storage, TransactionStorage]
 		[pallet_treasury, Treasury]
 		[pallet_uniques, Uniques]
