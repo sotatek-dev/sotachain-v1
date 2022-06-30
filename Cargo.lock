@@ -4085,8 +4085,11 @@ version = "2.8.0"
 dependencies = [
  "frame-support",
  "frame-system",
+ "log",
  "parity-scale-codec",
  "scale-info",
+ "sp-core",
+ "sp-runtime",
 ]
 
 [[package]]
