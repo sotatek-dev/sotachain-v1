@@ -318,7 +318,7 @@ impl InstanceFilter<Call> for ProxyType {
 				c,
 				Call::Balances(..)
 					| Call::Assets(..) | Call::Uniques(..)
-					| Call::Vesting(pallet_vesting::Call::vested_transfer { .. })
+					// | Call::Vesting(pallet_vesting::Call::vested_transfer { .. })
 					| Call::Indices(pallet_indices::Call::transfer { .. })
 			),
 			ProxyType::Governance => matches!(
@@ -785,19 +785,19 @@ impl pallet_nomination_pools::Config for Runtime {
 	type MinPointsToBalance = MinPointsToBalance;
 }
 
-parameter_types! {
-	pub const VoteLockingPeriod: BlockNumber = 30 * DAYS;
-}
+// parameter_types! {
+// 	pub const VoteLockingPeriod: BlockNumber = 30 * DAYS;
+// }
 
-impl pallet_conviction_voting::Config for Runtime {
-	type WeightInfo = pallet_conviction_voting::weights::SubstrateWeight<Self>;
-	type Event = Event;
-	type Currency = Balances;
-	type VoteLockingPeriod = VoteLockingPeriod;
-	type MaxVotes = ConstU32<512>;
-	type MaxTurnout = frame_support::traits::TotalIssuanceOf<Balances, Self::AccountId>;
-	type Polls = Referenda;
-}
+// impl pallet_conviction_voting::Config for Runtime {
+// 	type WeightInfo = pallet_conviction_voting::weights::SubstrateWeight<Self>;
+// 	type Event = Event;
+// 	type Currency = Balances;
+// 	type VoteLockingPeriod = VoteLockingPeriod;
+// 	type MaxVotes = ConstU32<512>;
+// 	type MaxTurnout = frame_support::traits::TotalIssuanceOf<Balances, Self::AccountId>;
+// 	type Polls = Referenda;
+// }
 
 parameter_types! {
 	pub const AlarmInterval: BlockNumber = 1;
@@ -805,67 +805,67 @@ parameter_types! {
 	pub const UndecidingTimeout: BlockNumber = 28 * DAYS;
 }
 
-pub struct TracksInfo;
-impl pallet_referenda::TracksInfo<Balance, BlockNumber> for TracksInfo {
-	type Id = u8;
-	type Origin = <Origin as frame_support::traits::OriginTrait>::PalletsOrigin;
-	fn tracks() -> &'static [(Self::Id, pallet_referenda::TrackInfo<Balance, BlockNumber>)] {
-		static DATA: [(u8, pallet_referenda::TrackInfo<Balance, BlockNumber>); 1] = [(
-			0u8,
-			pallet_referenda::TrackInfo {
-				name: "root",
-				max_deciding: 1,
-				decision_deposit: 10,
-				prepare_period: 4,
-				decision_period: 4,
-				confirm_period: 2,
-				min_enactment_period: 4,
-				min_approval: pallet_referenda::Curve::LinearDecreasing {
-					begin: Perbill::from_percent(100),
-					delta: Perbill::from_percent(50),
-				},
-				min_turnout: pallet_referenda::Curve::LinearDecreasing {
-					begin: Perbill::from_percent(100),
-					delta: Perbill::from_percent(100),
-				},
-			},
-		)];
-		&DATA[..]
-	}
-	fn track_for(id: &Self::Origin) -> Result<Self::Id, ()> {
-		if let Ok(system_origin) = frame_system::RawOrigin::try_from(id.clone()) {
-			match system_origin {
-				frame_system::RawOrigin::Root => Ok(0),
-				_ => Err(()),
-			}
-		} else {
-			Err(())
-		}
-	}
-}
+// pub struct TracksInfo;
+// impl pallet_referenda::TracksInfo<Balance, BlockNumber> for TracksInfo {
+// 	type Id = u8;
+// 	type Origin = <Origin as frame_support::traits::OriginTrait>::PalletsOrigin;
+// 	fn tracks() -> &'static [(Self::Id, pallet_referenda::TrackInfo<Balance, BlockNumber>)] {
+// 		static DATA: [(u8, pallet_referenda::TrackInfo<Balance, BlockNumber>); 1] = [(
+// 			0u8,
+// 			pallet_referenda::TrackInfo {
+// 				name: "root",
+// 				max_deciding: 1,
+// 				decision_deposit: 10,
+// 				prepare_period: 4,
+// 				decision_period: 4,
+// 				confirm_period: 2,
+// 				min_enactment_period: 4,
+// 				min_approval: pallet_referenda::Curve::LinearDecreasing {
+// 					begin: Perbill::from_percent(100),
+// 					delta: Perbill::from_percent(50),
+// 				},
+// 				min_turnout: pallet_referenda::Curve::LinearDecreasing {
+// 					begin: Perbill::from_percent(100),
+// 					delta: Perbill::from_percent(100),
+// 				},
+// 			},
+// 		)];
+// 		&DATA[..]
+// 	}
+// 	fn track_for(id: &Self::Origin) -> Result<Self::Id, ()> {
+// 		if let Ok(system_origin) = frame_system::RawOrigin::try_from(id.clone()) {
+// 			match system_origin {
+// 				frame_system::RawOrigin::Root => Ok(0),
+// 				_ => Err(()),
+// 			}
+// 		} else {
+// 			Err(())
+// 		}
+// 	}
+// }
 
-impl pallet_referenda::Config for Runtime {
-	type WeightInfo = pallet_referenda::weights::SubstrateWeight<Self>;
-	type Call = Call;
-	type Event = Event;
-	type Scheduler = Scheduler;
-	type Currency = pallet_balances::Pallet<Self>;
-	type CancelOrigin = EnsureRoot<AccountId>;
-	type KillOrigin = EnsureRoot<AccountId>;
-	type Slash = ();
-	type Votes = pallet_conviction_voting::VotesOf<Runtime>;
-	type Tally = pallet_conviction_voting::TallyOf<Runtime>;
-	type SubmissionDeposit = SubmissionDeposit;
-	type MaxQueued = ConstU32<100>;
-	type UndecidingTimeout = UndecidingTimeout;
-	type AlarmInterval = AlarmInterval;
-	type Tracks = TracksInfo;
-}
+// impl pallet_referenda::Config for Runtime {
+// 	type WeightInfo = pallet_referenda::weights::SubstrateWeight<Self>;
+// 	type Call = Call;
+// 	type Event = Event;
+// 	type Scheduler = Scheduler;
+// 	type Currency = pallet_balances::Pallet<Self>;
+// 	type CancelOrigin = EnsureRoot<AccountId>;
+// 	type KillOrigin = EnsureRoot<AccountId>;
+// 	type Slash = ();
+// 	type Votes = pallet_conviction_voting::VotesOf<Runtime>;
+// 	type Tally = pallet_conviction_voting::TallyOf<Runtime>;
+// 	type SubmissionDeposit = SubmissionDeposit;
+// 	type MaxQueued = ConstU32<100>;
+// 	type UndecidingTimeout = UndecidingTimeout;
+// 	type AlarmInterval = AlarmInterval;
+// 	type Tracks = TracksInfo;
+// }
 
-impl pallet_remark::Config for Runtime {
-	type WeightInfo = pallet_remark::weights::SubstrateWeight<Self>;
-	type Event = Event;
-}
+// impl pallet_remark::Config for Runtime {
+// 	type WeightInfo = pallet_remark::weights::SubstrateWeight<Self>;
+// 	type Event = Event;
+// }
 
 parameter_types! {
 	pub const LaunchPeriod: BlockNumber = 28 * 24 * 60 * MINUTES;
@@ -1240,10 +1240,10 @@ impl pallet_base_fee::Config for Runtime {
 	type DefaultBaseFeePerGas = DefaultBaseFeePerGas;
 }
 
-impl pallet_hotfix_sufficients::Config for Runtime {
-	type AddressMapping = EvmAddressMapping<Runtime>;
-	type WeightInfo = pallet_hotfix_sufficients::weights::SubstrateWeight<Runtime>;
-}
+// impl pallet_hotfix_sufficients::Config for Runtime {
+// 	type AddressMapping = EvmAddressMapping<Runtime>;
+// 	type WeightInfo = pallet_hotfix_sufficients::weights::SubstrateWeight<Runtime>;
+// }
 
 parameter_types! {
 	pub const ImOnlineUnsignedPriority: TransactionPriority = TransactionPriority::max_value();
@@ -1430,20 +1430,20 @@ parameter_types! {
 // 	type ChallengePeriod = ChallengePeriod;
 // }
 
-parameter_types! {
-	pub const MinVestedTransfer: Balance = 100 * DOLLARS;
-}
+// parameter_types! {
+// 	pub const MinVestedTransfer: Balance = 100 * DOLLARS;
+// }
 
-impl pallet_vesting::Config for Runtime {
-	type Event = Event;
-	type Currency = Balances;
-	type BlockNumberToBalance = ConvertInto;
-	type MinVestedTransfer = MinVestedTransfer;
-	type WeightInfo = pallet_vesting::weights::SubstrateWeight<Runtime>;
-	// `VestingInfo` encode length is 36bytes. 28 schedules gets encoded as 1009 bytes, which is the
-	// highest number of schedules that encodes less than 2^10.
-	const MAX_VESTING_SCHEDULES: u32 = 28;
-}
+// impl pallet_vesting::Config for Runtime {
+// 	type Event = Event;
+// 	type Currency = Balances;
+// 	type BlockNumberToBalance = ConvertInto;
+// 	type MinVestedTransfer = MinVestedTransfer;
+// 	type WeightInfo = pallet_vesting::weights::SubstrateWeight<Runtime>;
+// 	// `VestingInfo` encode length is 36bytes. 28 schedules gets encoded as 1009 bytes, which is the
+// 	// highest number of schedules that encodes less than 2^10.
+// 	const MAX_VESTING_SCHEDULES: u32 = 28;
+// }
 
 // impl pallet_mmr::Config for Runtime {
 // 	const INDEXING_PREFIX: &'static [u8] = b"mmr";
@@ -1675,7 +1675,7 @@ construct_runtime!(
 		Currencies: orml_currencies,
 		Tokens: orml_tokens,
 		TransactionPayment: pallet_transaction_payment,
-		Vesting: pallet_vesting,
+		// Vesting: pallet_vesting,
 		Assets: pallet_assets,
 		Uniques: pallet_uniques,
 
@@ -1719,9 +1719,9 @@ construct_runtime!(
 		BagsList: pallet_bags_list,
 		// StateTrieMigration: pallet_state_trie_migration,
 		ChildBounties: pallet_child_bounties,
-		Referenda: pallet_referenda,
-		Remark: pallet_remark,
-		ConvictionVoting: pallet_conviction_voting,
+		// Referenda: pallet_referenda,
+		// Remark: pallet_remark,
+		// ConvictionVoting: pallet_conviction_voting,
 		// Whitelist: pallet_whitelist,
 		NominationPools: pallet_nomination_pools,
 
@@ -1731,7 +1731,7 @@ construct_runtime!(
 		EVM: pallet_evm::{Pallet, Config, Call, Storage, Event<T>},
 		DynamicFee: pallet_dynamic_fee::{Pallet, Call, Storage, Config, Inherent},
 		BaseFee: pallet_base_fee::{Pallet, Call, Storage, Config<T>, Event},
-		HotfixSufficients: pallet_hotfix_sufficients::{Pallet, Call},
+		// HotfixSufficients: pallet_hotfix_sufficients::{Pallet, Call},
 		EvmAccounts: module_evm_accounts,
 
 		// Temporary
@@ -1883,7 +1883,7 @@ mod benches {
 		[pallet_bounties, Bounties]
 		[pallet_child_bounties, ChildBounties]
 		[pallet_collective, Council]
-		[pallet_conviction_voting, ConvictionVoting]
+		// [pallet_conviction_voting, ConvictionVoting]
 		[pallet_contracts, Contracts]
 		[pallet_democracy, Democracy]
 		[pallet_election_provider_multi_phase, ElectionProviderMultiPhase]
@@ -1902,9 +1902,9 @@ mod benches {
 		[pallet_offences, OffencesBench::<Runtime>]
 		[pallet_preimage, Preimage]
 		[pallet_proxy, Proxy]
-		[pallet_referenda, Referenda]
+		// [pallet_referenda, Referenda]
 		[pallet_recovery, Recovery]
-		[pallet_remark, Remark]
+		// [pallet_remark, Remark]
 		[pallet_scheduler, Scheduler]
 		[pallet_session, SessionBench::<Runtime>]
 		[pallet_staking, Staking]
@@ -1916,7 +1916,7 @@ mod benches {
 		[pallet_treasury, Treasury]
 		[pallet_uniques, Uniques]
 		[pallet_utility, Utility]
-		[pallet_vesting, Vesting]
+		// [pallet_vesting, Vesting]
 		// [pallet_whitelist, Whitelist],
 		[pallet_evm, EVM],
 	);
@@ -2397,11 +2397,11 @@ impl_runtime_apis! {
 			use frame_system_benchmarking::Pallet as SystemBench;
 			use baseline::Pallet as BaselineBench;
 			use pallet_nomination_pools_benchmarking::Pallet as NominationPoolsBench;
-			use pallet_hotfix_sufficients::Pallet as PalletHotfixSufficients;
+			// use pallet_hotfix_sufficients::Pallet as PalletHotfixSufficients;
 
 			let mut list = Vec::<BenchmarkList>::new();
 			list_benchmarks!(list, extra);
-			list_benchmark!(list, extra, pallet_hotfix_sufficients, PalletHotfixSufficients::<Runtime>);
+			// list_benchmark!(list, extra, pallet_hotfix_sufficients, PalletHotfixSufficients::<Runtime>);
 
 			let storage_info = AllPalletsWithSystem::storage_info();
 
@@ -2422,7 +2422,7 @@ impl_runtime_apis! {
 			use frame_system_benchmarking::Pallet as SystemBench;
 			use baseline::Pallet as BaselineBench;
 			use pallet_nomination_pools_benchmarking::Pallet as NominationPoolsBench;
-			use pallet_hotfix_sufficients::Pallet as PalletHotfixSufficients;
+			// use pallet_hotfix_sufficients::Pallet as PalletHotfixSufficients;
 			use pallet_evm::Pallet as PalletEvmBench;
 
 			impl pallet_session_benchmarking::Config for Runtime {}
@@ -2452,7 +2452,7 @@ impl_runtime_apis! {
 			let mut batches = Vec::<BenchmarkBatch>::new();
 			let params = (&config, &whitelist);
 			add_benchmarks!(params, batches, pallet_evm, PalletEvmBench::<Runtime>);
-			add_benchmark!(params, batches, pallet_hotfix_sufficients, PalletHotfixSufficients::<Runtime>);
+			// add_benchmark!(params, batches, pallet_hotfix_sufficients, PalletHotfixSufficients::<Runtime>);
 
 			Ok(batches)
 		}
