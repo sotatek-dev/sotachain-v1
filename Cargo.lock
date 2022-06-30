@@ -4080,6 +4080,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "module-evm-bridge"
+version = "2.8.0"
+dependencies = [
+ "parity-scale-codec",
+ "scale-info",
+]
+
+[[package]]
 name = "module-evm-utility"
 version = "2.8.0"
 dependencies = [
@@ -4549,6 +4557,7 @@ dependencies = [
  "hex-literal",
  "log",
  "module-evm-accounts",
+ "module-evm-bridge",
  "module-traits",
  "node-primitives",
  "orml-currencies",
