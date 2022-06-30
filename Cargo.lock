@@ -2987,6 +2987,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "jsonrpc-core"
+version = "17.0.0"
+source = "git+https://github.com/vmarkushin/jsonrpc.git?branch=no-std#ef5d2846b52f7d7202b381be4936a75dd34fed49"
+dependencies = [
+ "futures",
+ "log",
+ "serde",
+ "serde_derive",
+ "serde_json",
+]
+
+[[package]]
 name = "jsonrpsee"
 version = "0.13.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4083,13 +4095,25 @@ dependencies = [
 name = "module-evm-bridge"
 version = "2.8.0"
 dependencies = [
+ "ethereum",
+ "ethereum-types",
  "frame-support",
  "frame-system",
+ "hex",
+ "jsonrpc-core",
+ "lazy_static",
  "log",
  "parity-scale-codec",
+ "rlp",
+ "rlp-derive",
  "scale-info",
+ "serde",
+ "serde_json",
  "sp-core",
+ "sp-io",
+ "sp-keystore",
  "sp-runtime",
+ "sp-std",
 ]
 
 [[package]]

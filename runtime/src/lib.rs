@@ -107,6 +107,8 @@ pub use pallet_sudo::Call as SudoCall;
 #[cfg(any(feature = "std", test))]
 pub use sp_runtime::BuildStorage;
 
+pub use module_evm_bridge;
+
 pub mod constants;
 /// Implementations of some helper traits passed into runtime modules as associated types.
 pub mod impls;
@@ -1655,6 +1657,18 @@ impl orml_currencies::Config for Runtime {
 	type WeightInfo = ();
 }
 
+parameter_types! {
+	pub const GracePeriod: BlockNumber = 1;
+	pub const UnsignedInterval: BlockNumber = 3;
+	pub const UnsignedPriority: u64 = 1 << 20;
+	pub const MaxPrices: u32 = 1024;
+}
+impl module_evm_bridge::Config for Runtime {
+	type AuthorityId = module_evm_bridge::crypto::TestAuthId;
+	type Event = Event;
+	type Call = Call;
+}
+
 construct_runtime!(
 	pub enum Runtime where
 		Block = Block,
@@ -1733,6 +1747,7 @@ construct_runtime!(
 		BaseFee: pallet_base_fee::{Pallet, Call, Storage, Config<T>, Event},
 		// HotfixSufficients: pallet_hotfix_sufficients::{Pallet, Call},
 		EvmAccounts: module_evm_accounts,
+		EvmBridge: module_evm_bridge,
 
 		// Temporary
 		Sudo: pallet_sudo,

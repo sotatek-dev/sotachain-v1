@@ -52,6 +52,10 @@ pub struct Cli {
 	/// The dynamic-fee pallet target gas price set by block author
 	#[clap(long, default_value = "1")]
 	pub target_gas_price: u64,
+
+	///
+	#[clap(long, default_value = "https://data-seed-prebsc-1-s1.binance.org:8545/")]
+	pub evm_rpc_url: String,
 }
 
 /// Possible subcommands of the main binary.

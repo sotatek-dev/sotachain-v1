@@ -1,12 +1,34 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 
-use frame_support::{
-	ensure,
-	pallet_prelude::*,
-	traits::{Currency, IsType, OnKilledAccount},
+#[macro_use]
+extern crate alloc;
+
+use alloc::string::{String, ToString};
+use codec::{Decode, Encode, MaxEncodedLen};
+use frame_support::storage::bounded_vec::BoundedVec;
+use frame_support::traits::Get;
+use frame_system::{
+	self as system,
+	offchain::{
+		AppCrypto, CreateSignedTransaction, SendSignedTransaction, SendUnsignedTransaction,
+		SignedPayload, Signer, SigningTypes, SubmitTransaction,
+	},
 };
-use frame_system::{ensure_signed, pallet_prelude::*, offchain::{Signer, AppCrypto}};
+use jsonrpc_core as rpc;
+use rpc::Params;
+use serde::{Deserialize, Serialize};
+use serde_json::Value;
 use sp_core::crypto::KeyTypeId;
+use sp_runtime::{
+	offchain::{
+		http,
+		storage::{MutateStorageError, StorageRetrievalError, StorageValueRef},
+		Duration,
+	},
+	traits::Zero,
+	transaction_validity::{InvalidTransaction, TransactionValidity, ValidTransaction},
+	RuntimeDebug,
+};
 
 /// Defines application identifier for crypto keys of this module.
 ///
@@ -15,7 +37,7 @@ use sp_core::crypto::KeyTypeId;
 /// When offchain worker is signing transactions it's going to request keys of type
 /// `KeyTypeId` from the keystore and use the ones it finds to sign the transaction.
 /// The keys can be inserted manually via RPC (see `author_insertKey`).
-pub const KEY_TYPE: KeyTypeId = KeyTypeId(*b"evm-bridge!");
+pub const KEY_TYPE: KeyTypeId = KeyTypeId(*b"evmb");
 
 /// Based on the above `KeyTypeId` we need to generate a pallet-specific crypto type wrappers.
 /// We can use from supported crypto kinds (`sr25519`, `ed25519` and `ecdsa`) and augment
@@ -48,65 +70,76 @@ pub mod crypto {
 	}
 }
 
-pub use module::*;
+pub use pallet::*;
 
 #[frame_support::pallet]
-pub mod module {
+pub mod pallet {
 	use super::*;
 	use frame_support::pallet_prelude::*;
 	use frame_system::pallet_prelude::*;
 
+	/// This pallet's configuration trait
 	#[pallet::config]
-	pub trait Config: frame_system::Config {
+	pub trait Config: CreateSignedTransaction<Call<Self>> + frame_system::Config {
 		/// The identifier type for an offchain worker.
 		type AuthorityId: AppCrypto<Self::Public, Self::Signature>;
+
+		/// The overarching event type.
+		type Event: From<Event<Self>> + IsType<<Self as frame_system::Config>::Event>;
+
+		/// The overarching dispatch call type.
+		type Call: From<Call<Self>>;
 	}
 
-	// #[pallet::event]
-	// #[pallet::generate_deposit(pub(crate) fn deposit_event)]
-	// pub enum Event<T: Config> {
-	// }
-
-	/// Error for evm accounts module.
-	#[pallet::error]
-	pub enum Error<T> {}
-
-	/// The Substrate Account for EvmAddresses
-	///
-	/// Accounts: map EvmAddress => Option<AccountId>
-	// #[pallet::storage]
-	// #[pallet::getter(fn accounts)]
-	// pub type Accounts<T: Config> = StorageMap<_, Twox64Concat, EvmAddress, T::AccountId, OptionQuery>;
-
 	#[pallet::pallet]
+	#[pallet::generate_store(pub(super) trait Store)]
 	pub struct Pallet<T>(_);
 
 	#[pallet::hooks]
-	impl<T: Config> Hooks<T::BlockNumber> for Pallet<T> {
-        fn offchain_worker(block_number: T::BlockNumber) {
-            log::info!("evm-bridge");
+	impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {
+		fn offchain_worker(_block_number: T::BlockNumber) {
+			log::info!("evm-bridge");
 
-            let res = Self::fetch_evm_block();
-            if let Err(e) = res {
+			let res = Self::get_evm_latest_block();
+			if let Err(e) = res {
 				log::error!("Error: {}", e);
 			}
-        }
-    }
+		}
+	}
 
 	#[pallet::call]
 	impl<T: Config> Pallet<T> {}
+
+	/// Events for the pallet.
+	#[pallet::event]
+	#[pallet::generate_deposit(pub(super) fn deposit_event)]
+	pub enum Event<T: Config> {}
+
+	#[pallet::error]
+	pub enum Error<T> {}
 }
 
 impl<T: Config> Pallet<T> {
-    fn fetch_evm_block() -> Result<(), &'static str> {
-		let signer = Signer::<T, T::AuthorityId>::all_accounts();
-		if !signer.can_sign() {
-			return Err(
-				"No local accounts available. Consider adding one via `author_insertKey` RPC.",
-			)?;
+	fn get_evm_latest_block() -> Result<(), &'static str> {
+		let deadline = sp_io::offchain::timestamp().add(Duration::from_millis(2_000));
+		let body = serde_json::json!({
+			"jsonrpc": "2.0",
+			"method": "eth_blockNumber",
+			"params": [],
+			"id": 1,
+		});
+		let body = serde_json::to_vec(&body).map_err(|_| "Unknown")?;
+
+		let url = "https://data-seed-prebsc-1-s1.binance.org:8545/";
+		let mut request = http::Request::post(url, vec![body]);
+		request = request.add_header("content-type", "application/json");
+
+		let pending = request.deadline(deadline).send().map_err(|_| "IoError")?;
+		let response = pending.try_wait(deadline).map_err(|_| "DeadlineReached")?.map_err(|_| "DeadlineReached")?;
+		if response.code != 200 {
+			return Err("Unknown");
 		}
 
 		Ok(())
 	}
-
 }

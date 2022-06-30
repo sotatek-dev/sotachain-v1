@@ -217,7 +217,7 @@ pub fn new_partial(
 		// For pallet-offchain-worker
 		sp_keystore::SyncCryptoStore::sr25519_generate_new(
 			&*keystore,
-			frontier_template_runtime::pallet_ocw::KEY_TYPE,
+			node_runtime::module_evm_bridge::KEY_TYPE,
 			Some("//Alice"),
 		)
 		.expect("Creating key with account Alice should succeed.");
