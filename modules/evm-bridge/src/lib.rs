@@ -148,8 +148,20 @@ impl<T: Config> Pallet<T> {
 
 		log::warn!("Got price: {} cents", &result);
 
-		let without_prefix = result.to_string().trim_start_matches("0x");
+		let string_result = result.to_string();
+		let without_prefix = string_result.trim_start_matches("0x");
 		let z = u64::from_str_radix(without_prefix, 16);
+
+		let latest_block_key = StorageValueRef::persistent(b"evm_bridge::latest_block");
+		latest_block_key.mutate(|last_send: Result<Option<u64>, StorageRetrievalError>| {
+			match last_send {
+				// If we already have a value in storage and the block number is recent enough
+				// we avoid sending another transaction at this time.
+				// Ok(Some(block)) if block >= z { Err(block) } else { Ok(z) },
+				// In every other case we attempt to acquire the lock and send a transaction.
+				_ => z,
+			}
+		});
 
 		Ok(())
 	}
