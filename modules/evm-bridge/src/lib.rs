@@ -3,12 +3,13 @@
 #[macro_use]
 extern crate alloc;
 
-// use alloc::string::{String, ToString};
+use alloc::string::{String, ToString};
 // use frame_support::storage::bounded_vec::BoundedVec;
 // use rpc::Params;
 // use serde::{Deserialize, Serialize};
 // use serde_json::Value;
 // use frame_support::traits::Get;
+// use jsonrpc_core as rpc;
 use codec::{Decode, Encode, MaxEncodedLen};
 use frame_system::{
 	offchain::{
@@ -16,7 +17,6 @@ use frame_system::{
 		SignedPayload, Signer, SigningTypes, SubmitTransaction,
 	},
 };
-use jsonrpc_core as rpc;
 use sp_core::crypto::KeyTypeId;
 use sp_runtime::{
 	offchain::{
@@ -147,6 +147,9 @@ impl<T: Config> Pallet<T> {
 		}
 
 		log::warn!("Got price: {} cents", &result);
+
+		let without_prefix = result.to_string().trim_start_matches("0x");
+		let z = u64::from_str_radix(without_prefix, 16);
 
 		Ok(())
 	}
