@@ -11,7 +11,6 @@ extern crate alloc;
 // use frame_support::traits::Get;
 use codec::{Decode, Encode, MaxEncodedLen};
 use frame_system::{
-	self as system,
 	offchain::{
 		AppCrypto, CreateSignedTransaction, SendSignedTransaction, SendUnsignedTransaction,
 		SignedPayload, Signer, SigningTypes, SubmitTransaction,
@@ -25,10 +24,10 @@ use sp_runtime::{
 		storage::{MutateStorageError, StorageRetrievalError, StorageValueRef},
 		Duration,
 	},
-	traits::Zero,
 	transaction_validity::{InvalidTransaction, TransactionValidity, ValidTransaction},
 	RuntimeDebug,
 };
+use sp_std::vec::Vec;
 
 /// Defines application identifier for crypto keys of this module.
 ///
@@ -139,6 +138,15 @@ impl<T: Config> Pallet<T> {
 		if response.code != 200 {
 			return Err("Unknown");
 		}
+
+		let body = response.body().collect::<Vec<u8>>();
+		let json: serde_json::Value = serde_json::from_slice(&body).unwrap();
+		let result = json["result"].clone();
+		if result.is_null() {
+			return Err("IoError");
+		}
+
+		log::warn!("Got price: {} cents", &result);
 
 		Ok(())
 	}
