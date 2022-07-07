@@ -33,7 +33,7 @@ use sc_network::{Event, NetworkService};
 use sc_service::{config::Configuration, error::Error as ServiceError, RpcHandlers, TaskManager, BasePath};
 use sc_telemetry::{Telemetry, TelemetryWorker};
 use sp_api::ProvideRuntimeApi;
-use sp_core::crypto::Pair;
+use sp_core::{crypto::Pair, U256};
 use sp_runtime::{generic, traits::Block as BlockT, SaturatedConversion};
 use std::{
 	collections::BTreeMap,
@@ -157,7 +157,7 @@ pub(crate) fn db_config_dir(config: &Configuration) -> PathBuf {
 /// Creates a new partial node.
 pub fn new_partial(
 	config: &Configuration,
-	_cli: &Cli,
+	cli: &Cli,
 ) -> Result<
 	sc_service::PartialComponents<
 		FullClient,
@@ -238,6 +238,8 @@ pub fn new_partial(
 	)?;
 
 	let slot_duration = babe_link.config().slot_duration();
+	let target_gas_price = cli.target_gas_price;
+
 	let import_queue = sc_consensus_babe::import_queue(
 		babe_link.clone(),
 		block_import.clone(),
@@ -256,7 +258,9 @@ pub fn new_partial(
 			let uncles =
 				sp_authorship::InherentDataProvider::<<Block as BlockT>::Header>::check_inherents();
 
-			Ok((timestamp, slot, uncles))
+			let dynamic_fee = fp_dynamic_fee::InherentDataProvider(U256::from(target_gas_price));
+
+			Ok((timestamp, slot, uncles, dynamic_fee))
 		},
 		&task_manager.spawn_essential_handle(),
 		config.prometheus_registry(),
@@ -534,6 +538,8 @@ pub fn new_full_base(
 
 		let client_clone = client.clone();
 		let slot_duration = babe_link.config().slot_duration();
+		let target_gas_price = cli.target_gas_price;
+
 		let babe_config = sc_consensus_babe::BabeParams {
 			keystore: keystore_container.sync_keystore(),
 			client: client.clone(),
@@ -564,7 +570,9 @@ pub fn new_full_base(
 							&parent,
 						)?;
 
-					Ok((timestamp, slot, uncles, storage_proof))
+					let dynamic_fee = fp_dynamic_fee::InherentDataProvider(U256::from(target_gas_price));
+
+					Ok((timestamp, slot, uncles, storage_proof, dynamic_fee))
 				}
 			},
 			force_authoring,

@@ -102,7 +102,7 @@ const config: HardhatUserConfig = {
     bsctestnet: getChainConfig("bsctestnet"),
     sotachain: {
       accounts: [`0x${deployerPrivateKey}`],
-      chainId: 42,
+      chainId: 333,
       url: "http://localhost:9933",
     },
   },

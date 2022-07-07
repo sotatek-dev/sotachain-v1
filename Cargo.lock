@@ -4397,6 +4397,7 @@ dependencies = [
  "fc-mapping-sync",
  "fc-rpc",
  "fc-rpc-core",
+ "fp-dynamic-fee",
  "fp-evm",
  "frame-benchmarking-cli",
  "frame-system",
