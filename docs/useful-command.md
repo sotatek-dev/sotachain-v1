@@ -41,6 +41,15 @@ runtime/src/lib.rs
 
 ```
 
+## Deploy three nodes
+
+```sh
+cargo build --release # we need max performance
+make local1
+make local2
+make local3
+```
+
 ## Node information
 
 ### Node 1
