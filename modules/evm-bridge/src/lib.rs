@@ -10,7 +10,8 @@ use alloc::string::{String, ToString};
 // use serde_json::Value;
 // use frame_support::traits::Get;
 // use jsonrpc_core as rpc;
-use codec::{Decode, Encode, MaxEncodedLen};
+// use codec::{Decode, Encode, MaxEncodedLen};
+use codec::{Encode};
 use frame_system::{
 	offchain::{
 		AppCrypto, CreateSignedTransaction, SendSignedTransaction, SendUnsignedTransaction,
@@ -28,6 +29,8 @@ use sp_runtime::{
 	RuntimeDebug,
 };
 use sp_std::vec::Vec;
+use ethereum_types::{U256};
+use sp_std::str::FromStr;
 
 /// Defines application identifier for crypto keys of this module.
 ///
@@ -148,18 +151,15 @@ impl<T: Config> Pallet<T> {
 
 		log::warn!("Got price: {} cents", &result);
 
-		let string_result = result.to_string();
-		let without_prefix = string_result.trim_start_matches("0x");
-		let z = u64::from_str_radix(without_prefix, 16);
+		let string_result_with_escapes = result.to_string();
+		let string_result_without_escapes: &str = &string_result_with_escapes[1..string_result_with_escapes.len() - 1];
+		let latest_block = U256::from_str(string_result_without_escapes).expect("internal U256 is valid; qed");
 
 		let latest_block_key = StorageValueRef::persistent(b"evm_bridge::latest_block");
-		latest_block_key.mutate(|last_send: Result<Option<u64>, StorageRetrievalError>| {
+		latest_block_key.mutate(|last_send: Result<Option<U256>, StorageRetrievalError>| {
 			match last_send {
-				// If we already have a value in storage and the block number is recent enough
-				// we avoid sending another transaction at this time.
-				// Ok(Some(block)) if block >= z { Err(block) } else { Ok(z) },
-				// In every other case we attempt to acquire the lock and send a transaction.
-				_ => z,
+				Ok(Some(block)) if block >= latest_block => Err(block),
+				_ => Ok(latest_block),
 			}
 		});
 
