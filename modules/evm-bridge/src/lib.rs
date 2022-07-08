@@ -37,6 +37,7 @@ use frame_support::{
 use node_primitives::{evm::EvmAddress};
 use module_support::{AddressMapping};
 use scale_info::TypeInfo;
+use serde_json::Value;
 
 /// Type alias for currency balance.
 pub type BalanceOf<T> =
@@ -118,10 +119,21 @@ pub mod pallet {
 		fn offchain_worker(_block_number: T::BlockNumber) {
 			log::info!("evm-bridge");
 
-			// let res = Self::get_evm_latest_block();
-			let res = Self::get_evm_event();
-			if let Err(e) = res {
-				log::error!("Error: {}", e);
+			let latest_block = Self::get_evm_latest_block().unwrap();
+			let latest_processed_block_key = StorageValueRef::persistent(b"evm_bridge::latest_processed_block");
+			if let Ok(Some(latest_processed_block)) = latest_processed_block_key.get::<U256>() {
+				log::info!("1");
+				let res = Self::get_evm_event(&latest_processed_block, &latest_block);
+				if let Err(e) = res {
+					log::error!("Error: {}", e);
+				}
+			} else {
+				log::info!("2");
+				let latest_processed_block = latest_block - U256::from(1u32);
+				let res = Self::get_evm_event(&latest_processed_block, &latest_block);
+				if let Err(e) = res {
+					log::error!("Error: {}", e);
+				}
 			}
 		}
 	}
@@ -158,7 +170,7 @@ pub mod pallet {
 }
 
 impl<T: Config> Pallet<T> {
-	fn get_evm_latest_block() -> Result<(), &'static str> {
+	fn get_evm_latest_block() -> Result<U256, &'static str> {
 		let deadline = sp_io::offchain::timestamp().add(Duration::from_millis(2_000));
 		let body = serde_json::json!({
 			"jsonrpc": "2.0",
@@ -197,26 +209,36 @@ impl<T: Config> Pallet<T> {
 			}
 		});
 
-		Ok(())
+		Ok(latest_block)
 	}
 
-	fn get_evm_event() -> Result<(), &'static str> {
+	fn get_evm_event(latest_processed_block: &U256, latest_block: &U256) -> Result<(), &'static str> {
+		let from_block: U256 = latest_processed_block + U256::from(1u32);
+		let to_block: U256 = if latest_block - latest_processed_block <= U256::from(5u32) { *latest_block } else { latest_processed_block + U256::from(5u32) };
 		let deadline = sp_io::offchain::timestamp().add(Duration::from_millis(3_000));
 
-		let json = r#"
-			{
-				"fromBlock": "0x13e8308",
-				"toBlock": "0x13e8308",
-				"address": "0xada53e625c5cb7de867b197aeab7c39be95b1685",
-				"topics": [
-					"0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef",
-					null,
-					"0x000000000000000000000000b1b11e04348f4271b163db51138704f3dec0c128"
-				]
-			}
-		"#;
+		log::info!("fromBlock 0x{:x}", from_block);
+		log::info!("toBlock 0x{:x}", to_block);
 
-		let param: serde_json::Value = serde_json::from_str(json).unwrap();
+		let mut map = serde_json::Map::new();
+		map.insert("fromBlock".to_string(), Value::String(format!("0x{:x}", from_block)));
+		map.insert("toBlock".to_string(), Value::String(format!("0x{:x}", to_block)));
+		map.insert(
+			"address".to_string(),
+			Value::String("0xada53e625c5cb7de867b197aeab7c39be95b1685".to_string()),
+		);
+		map.insert(
+			"topics".to_string(),
+			Value::Array(
+				vec![
+					Value::String("0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef".to_string()),
+					Value::Null,
+					Value::String("0x000000000000000000000000b1b11e04348f4271b163db51138704f3dec0c128".to_string()),
+				]
+			),
+		);
+
+		let param: serde_json::Value = Value::Object(map);
 		let body = serde_json::json!({
 			"jsonrpc": "2.0",
 			"method": "eth_getLogs",
@@ -244,6 +266,14 @@ impl<T: Config> Pallet<T> {
 
 		let events: Vec<JsonEventEntity> = serde_json::from_value(result).unwrap();
 		if events.len() == 0 {
+			let latest_processed_block_key = StorageValueRef::persistent(b"evm_bridge::latest_processed_block");
+			latest_processed_block_key.mutate(|last_send: Result<Option<U256>, StorageRetrievalError>| {
+				match last_send {
+					Ok(Some(block)) if block >= to_block => Err(block),
+					_ => Ok(to_block),
+				}
+			});
+
 			return Ok(());
 		}
 
@@ -272,6 +302,14 @@ impl<T: Config> Pallet<T> {
 				}
 			}
 		}
+
+		let latest_processed_block_key = StorageValueRef::persistent(b"evm_bridge::latest_processed_block");
+		latest_processed_block_key.mutate(|last_send: Result<Option<U256>, StorageRetrievalError>| {
+			match last_send {
+				Ok(Some(block)) if block >= to_block => Err(block),
+				_ => Ok(to_block),
+			}
+		});
 
 		Ok(())
 	}
