@@ -11,26 +11,36 @@ use alloc::string::{String, ToString};
 // use frame_support::traits::Get;
 // use jsonrpc_core as rpc;
 // use codec::{Decode, Encode, MaxEncodedLen};
-use codec::{Encode};
+use codec::{Decode, Encode};
 use frame_system::{
 	offchain::{
-		AppCrypto, CreateSignedTransaction, SendSignedTransaction, SendUnsignedTransaction,
-		SignedPayload, Signer, SigningTypes, SubmitTransaction,
+		AppCrypto, CreateSignedTransaction, Signer,
+		SendSignedTransaction,
+		// SignedPayload, Signer, SigningTypes, SubmitTransaction,
 	},
 };
 use sp_core::crypto::KeyTypeId;
 use sp_runtime::{
 	offchain::{
 		http,
-		storage::{MutateStorageError, StorageRetrievalError, StorageValueRef},
+		storage::{StorageRetrievalError, StorageValueRef},
 		Duration,
 	},
-	transaction_validity::{InvalidTransaction, TransactionValidity, ValidTransaction},
-	RuntimeDebug,
+	SaturatedConversion,
 };
-use sp_std::vec::Vec;
-use ethereum_types::{U256};
+use sp_std::vec::{Vec};
+use ethereum_types::{U256, H256};
 use sp_std::str::FromStr;
+use frame_support::{
+	traits::{Currency}, transactional
+};
+use node_primitives::{evm::EvmAddress};
+use module_support::{AddressMapping};
+use scale_info::TypeInfo;
+
+/// Type alias for currency balance.
+pub type BalanceOf<T> =
+	<<T as Config>::Currency as Currency<<T as frame_system::Config>::AccountId>>::Balance;
 
 /// Defines application identifier for crypto keys of this module.
 ///
@@ -91,6 +101,12 @@ pub mod pallet {
 
 		/// The overarching dispatch call type.
 		type Call: From<Call<Self>>;
+
+		/// The Currency for managing Evm account assets.
+		type Currency: Currency<Self::AccountId>;
+
+		/// Mapping from address to account id.
+		type AddressMapping: AddressMapping<Self::AccountId>;
 	}
 
 	#[pallet::pallet]
@@ -102,7 +118,8 @@ pub mod pallet {
 		fn offchain_worker(_block_number: T::BlockNumber) {
 			log::info!("evm-bridge");
 
-			let res = Self::get_evm_latest_block();
+			// let res = Self::get_evm_latest_block();
+			let res = Self::get_evm_event();
 			if let Err(e) = res {
 				log::error!("Error: {}", e);
 			}
@@ -110,12 +127,31 @@ pub mod pallet {
 	}
 
 	#[pallet::call]
-	impl<T: Config> Pallet<T> {}
+	impl<T: Config> Pallet<T> {
+		#[pallet::weight(0)]
+		#[transactional]
+		pub fn claim(
+			origin: OriginFor<T>,
+			eth_address: EvmAddress,
+			amount: BalanceOf<T>,
+		) -> DispatchResult {
+			ensure_signed(origin)?;
+
+			let account_id = T::AddressMapping::get_account_id(&eth_address);
+			T::Currency::deposit_creating(&account_id, amount);
+
+			Self::deposit_event(Event::Claimed(account_id, eth_address, amount));
+
+			Ok(())
+		}
+	}
 
 	/// Events for the pallet.
 	#[pallet::event]
 	#[pallet::generate_deposit(pub(super) fn deposit_event)]
-	pub enum Event<T: Config> {}
+	pub enum Event<T: Config> {
+		Claimed(T::AccountId, EvmAddress, BalanceOf<T>),
+	}
 
 	#[pallet::error]
 	pub enum Error<T> {}
@@ -149,8 +185,6 @@ impl<T: Config> Pallet<T> {
 			return Err("IoError");
 		}
 
-		log::warn!("Got price: {} cents", &result);
-
 		let string_result_with_escapes = result.to_string();
 		let string_result_without_escapes: &str = &string_result_with_escapes[1..string_result_with_escapes.len() - 1];
 		let latest_block = U256::from_str(string_result_without_escapes).expect("internal U256 is valid; qed");
@@ -165,4 +199,161 @@ impl<T: Config> Pallet<T> {
 
 		Ok(())
 	}
+
+	fn get_evm_event() -> Result<(), &'static str> {
+		let deadline = sp_io::offchain::timestamp().add(Duration::from_millis(3_000));
+
+		let json = r#"
+			{
+				"fromBlock": "0x13e8308",
+				"toBlock": "0x13e8308",
+				"address": "0xada53e625c5cb7de867b197aeab7c39be95b1685",
+				"topics": [
+					"0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef",
+					null,
+					"0x000000000000000000000000b1b11e04348f4271b163db51138704f3dec0c128"
+				]
+			}
+		"#;
+
+		let param: serde_json::Value = serde_json::from_str(json).unwrap();
+		let body = serde_json::json!({
+			"jsonrpc": "2.0",
+			"method": "eth_getLogs",
+			"params": vec![param],
+			"id": 1,
+		});
+		let body = serde_json::to_vec(&body).map_err(|_| "Unknown")?;
+
+		let url = "https://data-seed-prebsc-1-s1.binance.org:8545/";
+		let mut request = http::Request::post(url, vec![body]);
+		request = request.add_header("content-type", "application/json");
+
+		let pending = request.deadline(deadline).send().map_err(|_| "IoError")?;
+		let response = pending.try_wait(deadline).map_err(|_| "DeadlineReached")?.map_err(|_| "DeadlineReached")?;
+		if response.code != 200 {
+			return Err("Unknown");
+		}
+
+		let body = response.body().collect::<Vec<u8>>();
+		let json: serde_json::Value = serde_json::from_slice(&body).unwrap();
+		let result = json["result"].clone();
+		if result.is_null() {
+			return Err("IoError");
+		}
+
+		let events: Vec<JsonEventEntity> = serde_json::from_value(result).unwrap();
+		if events.len() == 0 {
+			return Ok(());
+		}
+
+		let signer = Signer::<T, T::AuthorityId>::all_accounts();
+		if !signer.can_sign() {
+			return Err(
+				"No local accounts available. Consider adding one via `author_insertKey` RPC.",
+			)?;
+		}
+
+		for event in events {
+			let erc20_event = ERC20TransferEvent::from(event);
+			let amount: BalanceOf<T> = erc20_event.amount.clone().as_u128().saturated_into();
+
+			let results = signer.send_signed_transaction(|_account| {
+				Call::claim {
+					eth_address: erc20_event.from.clone(),
+					amount,
+				}
+			});
+
+			for (_, res) in &results {
+				match res {
+					Ok(()) => log::info!("Send transaction successfully"),
+					Err(e) => log::error!("Failed to submit transaction: {:?}", e),
+				}
+			}
+		}
+
+		Ok(())
+	}
+}
+
+#[derive(Debug, Clone, serde::Deserialize, TypeInfo)]
+#[serde(rename_all = "camelCase")]
+pub struct JsonEventEntity {
+	pub address: String,
+	pub topics: Vec<String>,
+	pub data: String,
+	pub block_number: String,
+	pub transaction_hash: String,
+	pub transaction_index: String,
+	pub block_hash: String,
+	pub log_index: String,
+	pub removed: bool,
+}
+
+#[derive(Debug, Clone, Encode, Decode, PartialEq, Eq, PartialOrd, Ord, TypeInfo)]
+pub struct ERC20TransferEvent {
+	pub address: EvmAddress,
+	pub from: EvmAddress,
+	pub to: EvmAddress,
+	pub amount: U256,
+	pub block_number: U256,
+	pub transaction_hash: H256,
+	pub transaction_index: U256,
+	pub block_hash: H256,
+	pub log_index: U256,
+	pub removed: bool,
+}
+
+impl From<JsonEventEntity> for ERC20TransferEvent {
+	fn from(raw: JsonEventEntity) -> Self {
+		Self {
+			address: hex_to_address(raw.address),
+			from: topic_to_address(raw.topics[1].clone()),
+			to: topic_to_address(raw.topics[2].clone()),
+			amount: hex_to_u256(raw.data),
+			block_number: hex_to_u256(raw.block_number),
+			transaction_hash: hex_to_h256(raw.transaction_hash),
+			transaction_index: hex_to_u256(raw.transaction_index),
+			block_hash: hex_to_h256(raw.block_hash),
+			log_index: hex_to_u256(raw.log_index),
+			removed: raw.removed,
+		}
+	}
+}
+
+fn hex_to_address(v: String) -> EvmAddress {
+    let s = &mut v[2..].as_bytes().to_vec();
+    if s.len() % 2 != 0 {
+        s.push(b'0');
+    }
+    let b = hex::decode(&s).unwrap();
+    EvmAddress::from_slice(&b)
+}
+
+fn topic_to_address(v: String) -> EvmAddress {
+    let s = &mut v[26..].as_bytes().to_vec();
+    if s.len() % 2 != 0 {
+        s.push(b'0');
+    }
+    let b = hex::decode(&s).unwrap();
+    EvmAddress::from_slice(&b)
+}
+
+fn hex_to_h256(v: String) -> H256 {
+	let s = &mut v[2..].as_bytes().to_vec();
+	if s.len() % 2 != 0 {
+		s.push(b'0');
+	}
+	let b = hex::decode(&s).unwrap();
+	H256::from_slice(&b)
+}
+
+fn hex_to_u256(v: String) -> U256 {
+	let s = &mut v[2..].as_bytes().to_vec();
+	if s.len() % 2 != 0 {
+		s.insert(0, b'0'); // big endian .. add to the first.
+	}
+	let b = hex::decode(&s).unwrap();
+	U256::from_big_endian(b.as_slice())
 }

@@ -1667,6 +1667,9 @@ impl module_evm_bridge::Config for Runtime {
 	type AuthorityId = module_evm_bridge::crypto::TestAuthId;
 	type Event = Event;
 	type Call = Call;
+
+	type Currency = Balances;
+	type AddressMapping = EvmAddressMapping<Runtime>;
 }
 
 construct_runtime!(

@@ -4103,6 +4103,8 @@ dependencies = [
  "jsonrpc-core",
  "lazy_static",
  "log",
+ "module-support",
+ "node-primitives",
  "parity-scale-codec",
  "rlp",
  "rlp-derive",
