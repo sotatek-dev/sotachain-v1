@@ -10,8 +10,7 @@ use alloc::string::{String, ToString};
 // use serde_json::Value;
 // use frame_support::traits::Get;
 // use jsonrpc_core as rpc;
-// use codec::{Decode, Encode, MaxEncodedLen};
-use codec::{Decode, Encode};
+use codec::{Decode, Encode, MaxEncodedLen};
 use frame_system::{
 	offchain::{
 		AppCrypto, CreateSignedTransaction, Signer,
@@ -26,7 +25,7 @@ use sp_runtime::{
 		storage::{StorageRetrievalError, StorageValueRef},
 		Duration,
 	},
-	SaturatedConversion,
+	SaturatedConversion, RuntimeDebug,
 };
 use sp_std::vec::{Vec};
 use ethereum_types::{U256, H256};
@@ -122,13 +121,11 @@ pub mod pallet {
 			let latest_block = Self::get_evm_latest_block().unwrap();
 			let latest_processed_block_key = StorageValueRef::persistent(b"evm_bridge::latest_processed_block");
 			if let Ok(Some(latest_processed_block)) = latest_processed_block_key.get::<U256>() {
-				log::info!("1");
 				let res = Self::get_evm_event(&latest_processed_block, &latest_block);
 				if let Err(e) = res {
 					log::error!("Error: {}", e);
 				}
 			} else {
-				log::info!("2");
 				let latest_processed_block = latest_block - U256::from(1u32);
 				let res = Self::get_evm_event(&latest_processed_block, &latest_block);
 				if let Err(e) = res {
@@ -144,15 +141,51 @@ pub mod pallet {
 		#[transactional]
 		pub fn claim(
 			origin: OriginFor<T>,
+			tx_hash: H256,
+			log_index: U256,
 			eth_address: EvmAddress,
 			amount: BalanceOf<T>,
 		) -> DispatchResult {
 			ensure_signed(origin)?;
 
-			let account_id = T::AddressMapping::get_account_id(&eth_address);
-			T::Currency::deposit_creating(&account_id, amount);
+			if let Some(mut event_info) = Claims::<T>::get(tx_hash, log_index) {
+				event_info.confirmation += 1u32;
+				Claims::<T>::insert(
+					tx_hash.clone(),
+					log_index.clone(),
+					event_info.clone(),
+				);
+			} else {
+				let event_info = Erc20BridgeInfo {
+					confirmation: 1u32,
+					is_executed: false, 
+				};
+				Claims::<T>::insert(
+					tx_hash.clone(),
+					log_index.clone(),
+					event_info.clone(),
+				);
+			}
 
-			Self::deposit_event(Event::Claimed(account_id, eth_address, amount));
+			if let Some(mut event_info) = Claims::<T>::get(tx_hash, log_index) {
+				if event_info.is_executed {
+					return Ok(());
+				}
+		
+				// TODO: load this threshold from config
+				if event_info.confirmation >= 1u32 {
+					let account_id = T::AddressMapping::get_account_id(&eth_address);
+					T::Currency::deposit_creating(&account_id, amount);
+					Self::deposit_event(Event::Claimed(account_id, eth_address, amount));
+		
+					event_info.is_executed = true;
+					Claims::<T>::insert(
+						tx_hash.clone(),
+						log_index.clone(),
+						event_info,
+					);
+				}
+			}
 
 			Ok(())
 		}
@@ -166,7 +199,26 @@ pub mod pallet {
 	}
 
 	#[pallet::error]
-	pub enum Error<T> {}
+	pub enum Error<T> {
+		TxMinted,
+	}
+
+	#[pallet::storage]
+	#[pallet::getter(fn claims)]
+	pub type Claims<T> = StorageDoubleMap<
+	  _,
+	  Blake2_128Concat,
+	  H256,
+	  Blake2_128Concat,
+	  U256,
+	  Erc20BridgeInfo,
+	>;
+}
+
+#[derive(Encode, Decode, Eq, PartialEq, Clone, Copy, RuntimeDebug, TypeInfo, MaxEncodedLen)]
+pub struct Erc20BridgeInfo {
+	pub confirmation: u32,
+	pub is_executed: bool,
 }
 
 impl<T: Config> Pallet<T> {
@@ -207,12 +259,12 @@ impl<T: Config> Pallet<T> {
 				Ok(Some(block)) if block >= latest_block => Err(block),
 				_ => Ok(latest_block),
 			}
-		});
+		}).map_err(|_| "StorageRetrievalError")?;
 
 		Ok(latest_block)
 	}
 
-	fn get_evm_event(latest_processed_block: &U256, latest_block: &U256) -> Result<(), &'static str> {
+	fn get_evm_event(latest_processed_block: &U256, latest_block: &U256) -> Result<(), String> {
 		let from_block: U256 = latest_processed_block + U256::from(1u32);
 		let to_block: U256 = if latest_block - latest_processed_block <= U256::from(5u32) { *latest_block } else { latest_processed_block + U256::from(5u32) };
 		let deadline = sp_io::offchain::timestamp().add(Duration::from_millis(3_000));
@@ -254,33 +306,22 @@ impl<T: Config> Pallet<T> {
 		let pending = request.deadline(deadline).send().map_err(|_| "IoError")?;
 		let response = pending.try_wait(deadline).map_err(|_| "DeadlineReached")?.map_err(|_| "DeadlineReached")?;
 		if response.code != 200 {
-			return Err("Unknown");
+			return Err("response.code != 200".to_string());
 		}
 
 		let body = response.body().collect::<Vec<u8>>();
 		let json: serde_json::Value = serde_json::from_slice(&body).unwrap();
 		let result = json["result"].clone();
 		if result.is_null() {
-			return Err("IoError");
+			return Err("result.is_null".to_string());
 		}
 
 		let events: Vec<JsonEventEntity> = serde_json::from_value(result).unwrap();
-		if events.len() == 0 {
-			let latest_processed_block_key = StorageValueRef::persistent(b"evm_bridge::latest_processed_block");
-			latest_processed_block_key.mutate(|last_send: Result<Option<U256>, StorageRetrievalError>| {
-				match last_send {
-					Ok(Some(block)) if block >= to_block => Err(block),
-					_ => Ok(to_block),
-				}
-			});
-
-			return Ok(());
-		}
 
 		let signer = Signer::<T, T::AuthorityId>::all_accounts();
 		if !signer.can_sign() {
 			return Err(
-				"No local accounts available. Consider adding one via `author_insertKey` RPC.",
+				"No local accounts available. Consider adding one via `author_insertKey` RPC.".to_string(),
 			)?;
 		}
 
@@ -290,6 +331,8 @@ impl<T: Config> Pallet<T> {
 
 			let results = signer.send_signed_transaction(|_account| {
 				Call::claim {
+					tx_hash: erc20_event.transaction_hash,
+					log_index: erc20_event.log_index,
 					eth_address: erc20_event.from.clone(),
 					amount,
 				}
@@ -298,7 +341,10 @@ impl<T: Config> Pallet<T> {
 			for (_, res) in &results {
 				match res {
 					Ok(()) => log::info!("Send transaction successfully"),
-					Err(e) => log::error!("Failed to submit transaction: {:?}", e),
+					Err(e) => {
+						let message = format!("Failed to submit transaction: {:?}", e);
+						return Err(message.clone());
+					},
 				}
 			}
 		}
@@ -309,7 +355,7 @@ impl<T: Config> Pallet<T> {
 				Ok(Some(block)) if block >= to_block => Err(block),
 				_ => Ok(to_block),
 			}
-		});
+		}).map_err(|_| "StorageRetrievalError")?;
 
 		Ok(())
 	}
