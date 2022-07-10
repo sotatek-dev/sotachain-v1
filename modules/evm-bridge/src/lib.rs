@@ -107,6 +107,8 @@ pub mod pallet {
 
 		/// Mapping from address to account id.
 		type AddressMapping: AddressMapping<Self::AccountId>;
+
+		type BridgeOrigin: EnsureOrigin<Self::Origin, Success = Self::AccountId>;
 	}
 
 	#[pallet::pallet]
@@ -146,6 +148,7 @@ pub mod pallet {
 			eth_address: EvmAddress,
 			amount: BalanceOf<T>,
 		) -> DispatchResult {
+			// T::BridgeOrigin::ensure_origin(origin)?;
 			ensure_signed(origin)?;
 
 			if let Some(mut event_info) = Claims::<T>::get(tx_hash, log_index) {
@@ -173,6 +176,7 @@ pub mod pallet {
 				}
 		
 				// TODO: load this threshold from config
+				// TODO: check duplicate submit
 				if event_info.confirmation >= 1u32 {
 					let account_id = T::AddressMapping::get_account_id(&eth_address);
 					T::Currency::deposit_creating(&account_id, amount);

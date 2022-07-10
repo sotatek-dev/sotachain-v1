@@ -1670,6 +1670,8 @@ impl module_evm_bridge::Config for Runtime {
 
 	type Currency = Balances;
 	type AddressMapping = EvmAddressMapping<Runtime>;
+
+	type BridgeOrigin = pallet_collective::EnsureMember<AccountId, TechnicalCollective>;
 }
 
 construct_runtime!(
