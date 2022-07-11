@@ -446,6 +446,7 @@ impl pallet_indices::Config for Runtime {
 }
 
 parameter_types! {
+	// SOTA: fee to create a new account
 	pub const ExistentialDeposit: Balance = 1 * DOLLARS;
 	// For weight estimation, we assume that the most locks on an individual account will be 50.
 	// This number may need to be adjusted in the future if this assumption no longer holds true.
