@@ -1005,18 +1005,19 @@ type EnsureRootOrHalfCouncil = EnsureOneOf<
 	EnsureRoot<AccountId>,
 	pallet_collective::EnsureProportionMoreThan<AccountId, CouncilCollective, 1, 2>,
 >;
-// impl pallet_membership::Config<pallet_membership::Instance1> for Runtime {
-// 	type Event = Event;
-// 	type AddOrigin = EnsureRootOrHalfCouncil;
-// 	type RemoveOrigin = EnsureRootOrHalfCouncil;
-// 	type SwapOrigin = EnsureRootOrHalfCouncil;
-// 	type ResetOrigin = EnsureRootOrHalfCouncil;
-// 	type PrimeOrigin = EnsureRootOrHalfCouncil;
-// 	type MembershipInitialized = TechnicalCommittee;
-// 	type MembershipChanged = TechnicalCommittee;
-// 	type MaxMembers = TechnicalMaxMembers;
-// 	type WeightInfo = pallet_membership::weights::SubstrateWeight<Runtime>;
-// }
+
+impl pallet_membership::Config<pallet_membership::Instance1> for Runtime {
+	type Event = Event;
+	type AddOrigin = EnsureRootOrHalfCouncil;
+	type RemoveOrigin = EnsureRootOrHalfCouncil;
+	type SwapOrigin = EnsureRootOrHalfCouncil;
+	type ResetOrigin = EnsureRootOrHalfCouncil;
+	type PrimeOrigin = EnsureRootOrHalfCouncil;
+	type MembershipInitialized = TechnicalCommittee;
+	type MembershipChanged = TechnicalCommittee;
+	type MaxMembers = TechnicalMaxMembers;
+	type WeightInfo = pallet_membership::weights::SubstrateWeight<Runtime>;
+}
 
 parameter_types! {
 	pub const ProposalBond: Permill = Permill::from_percent(5);
@@ -1670,8 +1671,7 @@ impl module_evm_bridge::Config for Runtime {
 
 	type Currency = Balances;
 	type AddressMapping = EvmAddressMapping<Runtime>;
-
-	type BridgeOrigin = pallet_collective::EnsureMember<AccountId, TechnicalCollective>;
+	type BridgeContains = TechnicalMembership;
 }
 
 construct_runtime!(
@@ -1716,7 +1716,7 @@ construct_runtime!(
 		// Governance
 		Council: pallet_collective::<Instance1>,
 		TechnicalCommittee: pallet_collective::<Instance2>,
-		// TechnicalMembership: pallet_membership::<Instance1>,
+		TechnicalMembership: pallet_membership::<Instance1>,
 
 		// Others
 		Indices: pallet_indices,
@@ -1915,7 +1915,7 @@ mod benches {
 		[pallet_im_online, ImOnline]
 		[pallet_indices, Indices]
 		// [pallet_lottery, Lottery]
-		// [pallet_membership, TechnicalMembership]
+		[pallet_membership, TechnicalMembership]
 		// [pallet_mmr, Mmr]
 		[pallet_multisig, Multisig]
 		[pallet_nomination_pools, NominationPoolsBench::<Runtime>]

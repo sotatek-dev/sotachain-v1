@@ -31,7 +31,7 @@ use sp_std::vec::{Vec};
 use ethereum_types::{U256, H256};
 use sp_std::str::FromStr;
 use frame_support::{
-	traits::{Currency}, transactional
+	traits::{Currency, Contains}, transactional
 };
 use node_primitives::{evm::EvmAddress};
 use module_support::{AddressMapping};
@@ -108,7 +108,7 @@ pub mod pallet {
 		/// Mapping from address to account id.
 		type AddressMapping: AddressMapping<Self::AccountId>;
 
-		type BridgeOrigin: EnsureOrigin<Self::Origin, Success = Self::AccountId>;
+		type BridgeContains: Contains<Self::AccountId>;
 	}
 
 	#[pallet::pallet]
@@ -148,8 +148,8 @@ pub mod pallet {
 			eth_address: EvmAddress,
 			amount: BalanceOf<T>,
 		) -> DispatchResult {
-			// T::BridgeOrigin::ensure_origin(origin)?;
-			ensure_signed(origin)?;
+			let who = ensure_signed(origin)?;
+			ensure!(T::BridgeContains::contains(&who), Error::<T>::OnlyOwner);
 
 			if let Some(mut event_info) = Claims::<T>::get(tx_hash, log_index) {
 				event_info.confirmation += 1u32;
@@ -204,7 +204,7 @@ pub mod pallet {
 
 	#[pallet::error]
 	pub enum Error<T> {
-		TxMinted,
+		OnlyOwner,
 	}
 
 	#[pallet::storage]

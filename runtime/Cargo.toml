@@ -77,7 +77,7 @@ pallet-im-online = { version = "4.0.0-dev", default-features = false, git = "htt
 pallet-indices = { version = "4.0.0-dev", default-features = false, git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.23" }
 pallet-identity = { version = "4.0.0-dev", default-features = false, git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.23" }
 # pallet-lottery = { version = "4.0.0-dev", default-features = false, git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.23" }
-# pallet-membership = { version = "4.0.0-dev", default-features = false, git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.23" }
+pallet-membership = { version = "4.0.0-dev", default-features = false, git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.23" }
 # pallet-mmr = { version = "4.0.0-dev", default-features = false, git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.23" }
 pallet-multisig = { version = "4.0.0-dev", default-features = false, git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.23" }
 pallet-nomination-pools = { version = "1.0.0", default-features = false, git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.23" }
@@ -164,7 +164,7 @@ std = [
 	"pallet-indices/std",
 	"sp-inherents/std",
 	# "pallet-lottery/std",
-	# "pallet-membership/std",
+	"pallet-membership/std",
 	# "pallet-mmr/std",
 	"pallet-multisig/std",
 	"pallet-nomination-pools/std",
@@ -258,7 +258,7 @@ runtime-benchmarks = [
 	"pallet-im-online/runtime-benchmarks",
 	"pallet-indices/runtime-benchmarks",
 	# "pallet-lottery/runtime-benchmarks",
-	# "pallet-membership/runtime-benchmarks",
+	"pallet-membership/runtime-benchmarks",
 	# "pallet-mmr/runtime-benchmarks",
 	"pallet-multisig/runtime-benchmarks",
 	"pallet-nomination-pools-benchmarking",
@@ -310,7 +310,7 @@ try-runtime = [
 	"pallet-im-online/try-runtime",
 	"pallet-indices/try-runtime",
 	# "pallet-lottery/try-runtime",
-	# "pallet-membership/try-runtime",
+	"pallet-membership/try-runtime",
 	# "pallet-mmr/try-runtime",
 	"pallet-multisig/try-runtime",
 	"pallet-offences/try-runtime",
