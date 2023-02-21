@@ -236,7 +236,7 @@ impl<T: Config> Pallet<T> {
 		});
 		let body = serde_json::to_vec(&body).map_err(|_| "Unknown")?;
 
-		let url = "https://data-seed-prebsc-1-s1.binance.org:8545/";
+		let url = "https://data-seed-prebsc-1-s3.binance.org:8545/";
 		let mut request = http::Request::post(url, vec![body]);
 		request = request.add_header("content-type", "application/json");
 
@@ -303,7 +303,7 @@ impl<T: Config> Pallet<T> {
 		});
 		let body = serde_json::to_vec(&body).map_err(|_| "Unknown")?;
 
-		let url = "https://data-seed-prebsc-1-s1.binance.org:8545/";
+		let url = "https://data-seed-prebsc-1-s3.binance.org:8545/";
 		let mut request = http::Request::post(url, vec![body]);
 		request = request.add_header("content-type", "application/json");
 

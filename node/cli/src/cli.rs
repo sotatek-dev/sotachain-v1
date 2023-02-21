@@ -54,7 +54,7 @@ pub struct Cli {
 	pub target_gas_price: u64,
 
 	///
-	#[clap(long, default_value = "https://data-seed-prebsc-1-s1.binance.org:8545/")]
+	#[clap(long, default_value = "https://data-seed-prebsc-1-s3.binance.org:8545/")]
 	pub evm_rpc_url: String,
 }
 

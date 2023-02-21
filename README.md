@@ -1,8 +1,10 @@
-# Substrate Node Template
+# Sotachain v1
 
-[![Try on playground](https://img.shields.io/badge/Playground-Node_Template-brightgreen?logo=Parity%20Substrate)](https://docs.substrate.io/playground/) [![Matrix](https://img.shields.io/matrix/substrate-technical:matrix.org)](https://matrix.to/#/#substrate-technical:matrix.org)
-
-A fresh FRAME-based [Substrate](https://www.substrate.io/) node, ready for hacking :rocket:
+Substrate example with features:
+* BABE consensus
+* EVM smart contract
+* Linking EVM account to Substrate account
+* Bridge token from BSC testnet to substrate
 
 ## Getting Started
 
@@ -110,6 +112,15 @@ Once the node template is running locally, you can connect it with **Polkadot-JS
 to interact with your chain. [Click
 here](https://polkadot.js.org/apps/#/explorer?rpc=ws://localhost:9944) connecting the Apps to your
 local node template.
+
+### Try link EVM account to Substrate account
+- Using Polkadot-JS Apps Front-end
+- Go to Developer > Extrinsics
+- Choose Alice
+- Choose evmAcounts > claimAccount(ethAddress,ethSignature)
+- You can get signature by `ts-scripts/test-claim-account-eip712.ts`
+- Submit transaction and wait for result
+
 
 ### Multi-Node Local Testnet
 
