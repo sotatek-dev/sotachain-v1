@@ -19,7 +19,7 @@ local1:
 		--port 30333 \
 		--ws-port 9945 \
 		--rpc-port 9933 \
-		--telemetry-url "wss://telemetry.polkadot.io/submit/ 0" \
+		# --telemetry-url "wss://telemetry.polkadot.io/submit/ 0" \
 		--validator \
 		--rpc-methods Unsafe \
 		--name MyNode01 \
@@ -46,7 +46,7 @@ local2:
 		--port 30334 \
 		--ws-port 9946 \
 		--rpc-port 9934 \
-		--telemetry-url "wss://telemetry.polkadot.io/submit/ 0" \
+		# --telemetry-url "wss://telemetry.polkadot.io/submit/ 0" \
 		--validator \
 		--rpc-methods Unsafe \
 		--bootnodes /ip4/127.0.0.1/tcp/30333/p2p/12D3KooWMM15SSRWdL6WJJH5qP85VUPC2XJNMuS2AvdiETS57SZS \
@@ -74,7 +74,7 @@ local3:
 		--port 30335 \
 		--ws-port 9947 \
 		--rpc-port 9935 \
-		--telemetry-url "wss://telemetry.polkadot.io/submit/ 0" \
+		# --telemetry-url "wss://telemetry.polkadot.io/submit/ 0" \
 		--validator \
 		--rpc-methods Unsafe \
 		--bootnodes /ip4/127.0.0.1/tcp/30333/p2p/12D3KooWMM15SSRWdL6WJJH5qP85VUPC2XJNMuS2AvdiETS57SZS \

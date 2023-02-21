@@ -107,6 +107,8 @@ pub use pallet_sudo::Call as SudoCall;
 #[cfg(any(feature = "std", test))]
 pub use sp_runtime::BuildStorage;
 
+pub use module_evm_bridge;
+
 pub mod constants;
 /// Implementations of some helper traits passed into runtime modules as associated types.
 pub mod impls;
@@ -444,6 +446,7 @@ impl pallet_indices::Config for Runtime {
 }
 
 parameter_types! {
+	// SOTA: fee to create a new account
 	pub const ExistentialDeposit: Balance = 1 * DOLLARS;
 	// For weight estimation, we assume that the most locks on an individual account will be 50.
 	// This number may need to be adjusted in the future if this assumption no longer holds true.
@@ -1003,18 +1006,19 @@ type EnsureRootOrHalfCouncil = EnsureOneOf<
 	EnsureRoot<AccountId>,
 	pallet_collective::EnsureProportionMoreThan<AccountId, CouncilCollective, 1, 2>,
 >;
-// impl pallet_membership::Config<pallet_membership::Instance1> for Runtime {
-// 	type Event = Event;
-// 	type AddOrigin = EnsureRootOrHalfCouncil;
-// 	type RemoveOrigin = EnsureRootOrHalfCouncil;
-// 	type SwapOrigin = EnsureRootOrHalfCouncil;
-// 	type ResetOrigin = EnsureRootOrHalfCouncil;
-// 	type PrimeOrigin = EnsureRootOrHalfCouncil;
-// 	type MembershipInitialized = TechnicalCommittee;
-// 	type MembershipChanged = TechnicalCommittee;
-// 	type MaxMembers = TechnicalMaxMembers;
-// 	type WeightInfo = pallet_membership::weights::SubstrateWeight<Runtime>;
-// }
+
+impl pallet_membership::Config<pallet_membership::Instance1> for Runtime {
+	type Event = Event;
+	type AddOrigin = EnsureRootOrHalfCouncil;
+	type RemoveOrigin = EnsureRootOrHalfCouncil;
+	type SwapOrigin = EnsureRootOrHalfCouncil;
+	type ResetOrigin = EnsureRootOrHalfCouncil;
+	type PrimeOrigin = EnsureRootOrHalfCouncil;
+	type MembershipInitialized = TechnicalCommittee;
+	type MembershipChanged = TechnicalCommittee;
+	type MaxMembers = TechnicalMaxMembers;
+	type WeightInfo = pallet_membership::weights::SubstrateWeight<Runtime>;
+}
 
 parameter_types! {
 	pub const ProposalBond: Permill = Permill::from_percent(5);
@@ -1655,6 +1659,22 @@ impl orml_currencies::Config for Runtime {
 	type WeightInfo = ();
 }
 
+parameter_types! {
+	pub const GracePeriod: BlockNumber = 1;
+	pub const UnsignedInterval: BlockNumber = 3;
+	pub const UnsignedPriority: u64 = 1 << 20;
+	pub const MaxPrices: u32 = 1024;
+}
+impl module_evm_bridge::Config for Runtime {
+	type AuthorityId = module_evm_bridge::crypto::TestAuthId;
+	type Event = Event;
+	type Call = Call;
+
+	type Currency = Balances;
+	type AddressMapping = EvmAddressMapping<Runtime>;
+	type BridgeContains = TechnicalMembership;
+}
+
 construct_runtime!(
 	pub enum Runtime where
 		Block = Block,
@@ -1697,7 +1717,7 @@ construct_runtime!(
 		// Governance
 		Council: pallet_collective::<Instance1>,
 		TechnicalCommittee: pallet_collective::<Instance2>,
-		// TechnicalMembership: pallet_membership::<Instance1>,
+		TechnicalMembership: pallet_membership::<Instance1>,
 
 		// Others
 		Indices: pallet_indices,
@@ -1733,6 +1753,7 @@ construct_runtime!(
 		BaseFee: pallet_base_fee::{Pallet, Call, Storage, Config<T>, Event},
 		// HotfixSufficients: pallet_hotfix_sufficients::{Pallet, Call},
 		EvmAccounts: module_evm_accounts,
+		EvmBridge: module_evm_bridge,
 
 		// Temporary
 		Sudo: pallet_sudo,
@@ -1895,7 +1916,7 @@ mod benches {
 		[pallet_im_online, ImOnline]
 		[pallet_indices, Indices]
 		// [pallet_lottery, Lottery]
-		// [pallet_membership, TechnicalMembership]
+		[pallet_membership, TechnicalMembership]
 		// [pallet_mmr, Mmr]
 		[pallet_multisig, Multisig]
 		[pallet_nomination_pools, NominationPoolsBench::<Runtime>]
